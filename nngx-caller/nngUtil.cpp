@@ -164,9 +164,8 @@ namespace nng::util::detail {
 }
 #endif
 
-
-// ��ʼ�� NNG ��
-// ���أ����������0 ��ʾ�ɹ�
+// 初始化 NNG 库
+// 返回：操作结果，0 表示成功
 int nng::util::initialize() noexcept {
 
     nng::Dialer::set_pre_address(
@@ -182,10 +181,10 @@ int nng::util::initialize() noexcept {
     );
 
     return nng::init();
-    }
+}
 
 
-// �ͷ� NNG ����Դ
+// 释放 NNG 库资源
 void nng::util::uninitialize() noexcept {
     nng::fini();
 }
@@ -193,11 +192,11 @@ void nng::util::uninitialize() noexcept {
 std::string nng::util::_Pre_address(std::string_view _Address) noexcept {
     constexpr std::string_view protocol = "ipc://";
 #if defined(__OHOS__)
-    /***************************************************************************************
-    *1.":///data/storage/el2/base/haps/entry/files/"
-    *2.":///data/app/e12/100/base/com.example.xclient/haps/entry/files/"
-    *����ϵͳ��֧�־���·������ɳ��·��ֻ��ʹ�õ�һ��·������ɳ��
-    ***************************************************************************************/
+	/***************************************************************************************
+	*1.":///data/storage/el2/base/haps/entry/files/"
+	*2.":///data/app/e12/100/base/com.example.xclient/haps/entry/files/"
+	*鸿蒙系统不支持绝对路径访问沙箱路径只是使用第一个路径访问沙箱
+	***************************************************************************************/
     constexpr std::string_view prefix = "/data/storage/el2/base/haps/entry/files/";
 #elif defined(__linux__) || defined(__APPLE__)
     constexpr std::string_view prefix = "/tmp/";
@@ -225,12 +224,16 @@ std::string nng::util::_Pre_address(std::string_view _Address) noexcept {
 
 void nng::util::_Pre_start_listen(nng::Listener& _Connector_ref) noexcept {
 #ifdef _WIN32
-    using namespace nng::util::detail;
-    static bool fAsd = (IsProcessElevated() || IsSystemAuthority());
-    if (fAsd) {
-        static CAccessSecurityDescriptor asd;
-        int rv = _Connector_ref.set_ptr(NNG_OPT_IPC_SECURITY_DESCRIPTOR, asd);
-        assert(rv == NNG_OK);
-    }
+	using namespace nng::util::detail;
+	static bool fAsd = (IsProcessElevated() || IsSystemAuthority());
+	if (fAsd) {
+		static CAccessSecurityDescriptor asd;
+		// 用于 Windows 进程在 SYSTEM 或 管理员 权限下创建监听时，用户权限进程能够访问。
+		int rv = _Connector_ref.set_ptr(NNG_OPT_IPC_SECURITY_DESCRIPTOR, asd);
+		assert(rv == NNG_OK);
+	}
 #endif
+	// 用于 Linux 进程在 root 权限下创建监听时，user 权限进程能够访问。
+	// （备注：Windows平台不会生效，所以不用放在 #else 中）
+	_Connector_ref.set_int(NNG_OPT_IPC_PERMISSIONS, 0777);
 }
