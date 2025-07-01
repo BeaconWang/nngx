@@ -1,15 +1,15 @@
-#pragma once
+ï»¿#pragma once
 
 #include "nngException.h"
 #include "nngListener.h"
 
 namespace nng::util
 {
-	// ³õÊ¼»¯ NNG ¿â
-	// ·µ»Ø£º²Ù×÷½á¹û£¬0 ±íÊ¾³É¹¦
+	// åˆå§‹åŒ– NNG åº“
+	// è¿”å›ï¼šæ“ä½œç»“æœï¼Œ0 è¡¨ç¤ºæˆåŠŸ
 	int initialize() noexcept;
 
-	// ÊÍ·Å NNG ¿â×ÊÔ´
+	// é‡Šæ”¾ NNG åº“èµ„æº
 	void uninitialize() noexcept;
 
     std::string _Pre_address(std::string_view _Address) noexcept;
