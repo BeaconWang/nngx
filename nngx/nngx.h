@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 
 #include <list>
 #include <mutex>
@@ -13,6 +13,23 @@
 #include "nngAio.h"
 #include "nngCtx.h"
 #include "nngService.h"
+
+/*
+__________
+\______   \ ____ _____    ____  ____   ____
+ |    |  _// __ \\__  \ _/ ___\/  _ \ /    \
+ |    |   \  ___/ / __ \\  \__(  <_> )   |  \
+ |______  /\___  >____  /\___  >____/|___|  /
+		\/     \/     \/     \/           \/
+		-- Create.Beacon.20250521
+		-- Modify.Beacon.20250623
+			-> 1. Support for advanced restricted access (access security descriptor)
+		-- Modify.Beacon.20250627
+			-> 1. Comaptible suport nng 1.11
+		-- Modify.Beacon.20250701
+			-> 1. Fix comment
+			-> 2. Add Msg::body_tail function to fetch data from the tail at a specified offset
+*/
 
 /*
 
@@ -31,13 +48,13 @@
 
 namespace nng
 {
-	// ³õÊ¼»¯ NNG ¿â
-	// ·µ»Ø£º²Ù×÷½á¹û£¬0 ±íÊ¾³É¹¦
+	// åˆå§‹åŒ– NNG åº“
+	// è¿”å›ï¼šæ“ä½œç»“æœï¼Œ0 è¡¨ç¤ºæˆåŠŸ
 	inline int init() noexcept {
 		return NNG_OK;
 	}
 
-	// ÊÍ·Å NNG ¿â×ÊÔ´
+	// é‡Šæ”¾ NNG åº“èµ„æº
 	inline void fini() noexcept {
 		nng_fini();
 	}
@@ -45,12 +62,12 @@ namespace nng
 
 namespace nng
 {
-	// AsyncContext Àà£ºÒì²½ÉÏÏÂÎÄ»ùÀà£¬¼Ì³Ğ Socket£¬Ìá¹©Òì²½ÏûÏ¢´¦ÀíÖ§³Ö
-	// ÓÃÍ¾£º¹ÜÀíÒì²½ I/O ²Ù×÷£¬Ìá¹©Ïß³Ì°²È«µÄÏûÏ¢·¢ËÍ»úÖÆ
-	// ÌØĞÔ£º
-	// - Ê¹ÓÃ RAII ¹ÜÀí Aio ¶ÔÏó
-	// - Í¨¹ı std::recursive_mutex È·±£Ïß³Ì°²È«
-	// - Ö§³ÖÒì²½ÏûÏ¢·¢ËÍ
+	// AsyncContext ç±»ï¼šå¼‚æ­¥ä¸Šä¸‹æ–‡åŸºç±»ï¼Œç»§æ‰¿ Socketï¼Œæä¾›å¼‚æ­¥æ¶ˆæ¯å¤„ç†æ”¯æŒ
+	// ç”¨é€”ï¼šç®¡ç†å¼‚æ­¥ I/O æ“ä½œï¼Œæä¾›çº¿ç¨‹å®‰å…¨çš„æ¶ˆæ¯å‘é€æœºåˆ¶
+	// ç‰¹æ€§ï¼š
+	// - ä½¿ç”¨ RAII ç®¡ç† Aio å¯¹è±¡
+	// - é€šè¿‡ std::recursive_mutex ç¡®ä¿çº¿ç¨‹å®‰å…¨
+	// - æ”¯æŒå¼‚æ­¥æ¶ˆæ¯å‘é€
 	class AsyncContext : virtual public Socket
 	{
 	protected:
@@ -59,19 +76,19 @@ namespace nng
 		using _Ty_unique_lock = ::std::unique_lock<_Ty_mutex>;
 
 	public:
-		// ¹¹Ôìº¯Êı£º³õÊ¼»¯Òì²½ÉÏÏÂÎÄ
-		// ²ÎÊı£ºcallback - »Øµ÷º¯Êı£¬callback_context - »Øµ÷ÉÏÏÂÎÄ
-		// Òì³££ºÈô Aio ·ÖÅäÊ§°Ü£¬Å×³ö Exception
+		// æ„é€ å‡½æ•°ï¼šåˆå§‹åŒ–å¼‚æ­¥ä¸Šä¸‹æ–‡
+		// å‚æ•°ï¼šcallback - å›è°ƒå‡½æ•°ï¼Œcallback_context - å›è°ƒä¸Šä¸‹æ–‡
+		// å¼‚å¸¸ï¼šè‹¥ Aio åˆ†é…å¤±è´¥ï¼ŒæŠ›å‡º Exception
 		AsyncContext(Aio::_Callback_t callback, void* callback_context) noexcept(false)
 			: _My_aio(callback, callback_context) {
 		}
 
-		// Îö¹¹º¯Êı£ºÊÍ·ÅÒì²½ÉÏÏÂÎÄ×ÊÔ´
+		// ææ„å‡½æ•°ï¼šé‡Šæ”¾å¼‚æ­¥ä¸Šä¸‹æ–‡èµ„æº
 		virtual ~AsyncContext() noexcept = default;
 
 	protected:
-		// ·¢ËÍÏûÏ¢
-		// ²ÎÊı£ºmsg - Òª·¢ËÍµÄ Msg ¶ÔÏó
+		// å‘é€æ¶ˆæ¯
+		// å‚æ•°ï¼šmsg - è¦å‘é€çš„ Msg å¯¹è±¡
 		inline void _Send(Msg&& msg) noexcept {
 			_My_aio_state = SEND;
 			nng_aio_set_msg(_My_aio, msg.release());
@@ -84,12 +101,12 @@ namespace nng
 		enum { INIT, RECV, SEND, WAIT, IDLE } _My_aio_state = INIT;
 	};
 
-	// AsyncSender Àà£ºÒì²½·¢ËÍ»ùÀà£¬¼Ì³Ğ AsyncContext£¬Ìá¹©ÏûÏ¢¶ÓÁĞºÍ»Øµ÷´¦Àí
-	// ÓÃÍ¾£ºÖ§³ÖÒì²½ÏûÏ¢·¢ËÍ£¬¹ÜÀíÏûÏ¢¶ÓÁĞ²¢´¦Àí·¢ËÍ/½ÓÊÕ»Øµ÷
-	// ÌØĞÔ£º
-	// - Ê¹ÓÃÏûÏ¢¶ÓÁĞ£¨std::queue£©¹ÜÀí´ı·¢ËÍÏûÏ¢
-	// - Ìá¹©Ğéº¯Êı½Ó¿ÚÒÔÖ§³Ö×ÓÀà×Ô¶¨Òå·¢ËÍ/½ÓÊÕĞĞÎª
-	// - Ïß³Ì°²È«£¬Í¨¹ı AsyncContext µÄ»¥³âËø±£»¤
+	// AsyncSender ç±»ï¼šå¼‚æ­¥å‘é€åŸºç±»ï¼Œç»§æ‰¿ AsyncContextï¼Œæä¾›æ¶ˆæ¯é˜Ÿåˆ—å’Œå›è°ƒå¤„ç†
+	// ç”¨é€”ï¼šæ”¯æŒå¼‚æ­¥æ¶ˆæ¯å‘é€ï¼Œç®¡ç†æ¶ˆæ¯é˜Ÿåˆ—å¹¶å¤„ç†å‘é€/æ¥æ”¶å›è°ƒ
+	// ç‰¹æ€§ï¼š
+	// - ä½¿ç”¨æ¶ˆæ¯é˜Ÿåˆ—ï¼ˆstd::queueï¼‰ç®¡ç†å¾…å‘é€æ¶ˆæ¯
+	// - æä¾›è™šå‡½æ•°æ¥å£ä»¥æ”¯æŒå­ç±»è‡ªå®šä¹‰å‘é€/æ¥æ”¶è¡Œä¸º
+	// - çº¿ç¨‹å®‰å…¨ï¼Œé€šè¿‡ AsyncContext çš„äº’æ–¥é”ä¿æŠ¤
 	class AsyncSender : public AsyncContext
 	{
 	protected:
@@ -100,16 +117,16 @@ namespace nng
 		} MSG_ITEM, * PMSG_ITEM;
 
 	public:
-		// ¹¹Ôìº¯Êı£º³õÊ¼»¯Òì²½·¢ËÍÆ÷
-		// Òì³££ºÈô Aio ·ÖÅäÊ§°Ü£¬Å×³ö Exception
+		// æ„é€ å‡½æ•°ï¼šåˆå§‹åŒ–å¼‚æ­¥å‘é€å™¨
+		// å¼‚å¸¸ï¼šè‹¥ Aio åˆ†é…å¤±è´¥ï¼ŒæŠ›å‡º Exception
 		AsyncSender() noexcept(false) : AsyncContext(_Callback_sender, this) {}
 
-		// Îö¹¹º¯Êı£ºÊÍ·ÅÒì²½·¢ËÍÆ÷×ÊÔ´
+		// ææ„å‡½æ•°ï¼šé‡Šæ”¾å¼‚æ­¥å‘é€å™¨èµ„æº
 		virtual ~AsyncSender() noexcept = default;
 
 	protected:
-		// ·¢ËÍÏûÏ¢Ïî
-		// ²ÎÊı£º_Msg_item - °üº¬ÏûÏ¢ºÍ¿ÉÑ¡»Ø¸´³ĞÅµµÄÏûÏ¢Ïî
+		// å‘é€æ¶ˆæ¯é¡¹
+		// å‚æ•°ï¼š_Msg_item - åŒ…å«æ¶ˆæ¯å’Œå¯é€‰å›å¤æ‰¿è¯ºçš„æ¶ˆæ¯é¡¹
 		void _Send(MSG_ITEM&& _Msg_item) noexcept {
 			_Ty_scoped_lock locker(_My_mtx);
 			_My_msgs.push(std::move(_Msg_item));
@@ -120,8 +137,8 @@ namespace nng
 		}
 
 	private:
-		// »Øµ÷º¯Êı£º´¦ÀíÒì²½ I/O ²Ù×÷µÄ½á¹û
-		// ²ÎÊı£ºcallback_context - »Øµ÷ÉÏÏÂÎÄ£¨Ö¸Ïò AsyncSender£©
+		// å›è°ƒå‡½æ•°ï¼šå¤„ç†å¼‚æ­¥ I/O æ“ä½œçš„ç»“æœ
+		// å‚æ•°ï¼šcallback_context - å›è°ƒä¸Šä¸‹æ–‡ï¼ˆæŒ‡å‘ AsyncSenderï¼‰
 		static void _Callback_sender(void* callback_context) noexcept {
 			auto _Sender = reinterpret_cast<AsyncSender*>(callback_context);
 			_Ty_scoped_lock locker(_Sender->_My_mtx);
@@ -157,7 +174,7 @@ namespace nng
 			}
 		}
 
-		// ·¢ËÍ¶ÓÁĞÖĞµÄÏÂÒ»¸öÏûÏ¢
+		// å‘é€é˜Ÿåˆ—ä¸­çš„ä¸‹ä¸€ä¸ªæ¶ˆæ¯
 		void _Send_next() noexcept {
 			_Ty_scoped_lock locker(_My_mtx);
 
@@ -170,48 +187,48 @@ namespace nng
 		}
 
 	private:
-		// Ğéº¯Êı£º´¦ÀíÏûÏ¢·¢ËÍÍê³É
-		// ²ÎÊı£º_Msg_item - ·¢ËÍµÄÏûÏ¢Ïî
+		// è™šå‡½æ•°ï¼šå¤„ç†æ¶ˆæ¯å‘é€å®Œæˆ
+		// å‚æ•°ï¼š_Msg_item - å‘é€çš„æ¶ˆæ¯é¡¹
 		virtual void _On_sender_sent(MSG_ITEM& _Msg_item) noexcept {}
 
-		// Ğéº¯Êı£º´¦Àí·¢ËÍÒì³£
-		// ²ÎÊı£º_Msg_item - ·¢ËÍµÄÏûÏ¢Ïî£¬e - ´íÎóÂë
+		// è™šå‡½æ•°ï¼šå¤„ç†å‘é€å¼‚å¸¸
+		// å‚æ•°ï¼š_Msg_item - å‘é€çš„æ¶ˆæ¯é¡¹ï¼Œe - é”™è¯¯ç 
 		virtual void _On_sender_exception(MSG_ITEM& _Msg_item, nng_err e) noexcept {}
 
-		// Ğéº¯Êı£º´¦Àí½ÓÊÕµ½µÄ»Ø¸´ÏûÏ¢
-		// ²ÎÊı£º_Msg_item - ·¢ËÍµÄÏûÏ¢Ïî£¬m - ½ÓÊÕµÄ»Ø¸´ÏûÏ¢
+		// è™šå‡½æ•°ï¼šå¤„ç†æ¥æ”¶åˆ°çš„å›å¤æ¶ˆæ¯
+		// å‚æ•°ï¼š_Msg_item - å‘é€çš„æ¶ˆæ¯é¡¹ï¼Œm - æ¥æ”¶çš„å›å¤æ¶ˆæ¯
 		virtual void _On_sender_recv(MSG_ITEM& _Msg_item, Msg& m) noexcept {}
 
 	protected:
 		std::queue<MSG_ITEM> _My_msgs;
 	};
 
-	// AsyncSenderNoReturn Àà£ºÎŞ·µ»ØµÄÒì²½·¢ËÍÆ÷£¬¼Ì³Ğ AsyncSender
-	// ÓÃÍ¾£ºÌá¹©ÎŞ»Ø¸´ĞèÇóµÄÒì²½ÏûÏ¢·¢ËÍ¹¦ÄÜ
-	// ÌØĞÔ£º
-	// - Ö§³Ö¶àÖÖÏûÏ¢¸ñÊ½£¨iov¡¢Msg¡¢´ø´úÂëµÄ Msg£©
-	// - ¼Ì³Ğ AsyncSender µÄÏß³Ì°²È«ºÍ¶ÓÁĞ¹ÜÀí
+	// AsyncSenderNoReturn ç±»ï¼šæ— è¿”å›çš„å¼‚æ­¥å‘é€å™¨ï¼Œç»§æ‰¿ AsyncSender
+	// ç”¨é€”ï¼šæä¾›æ— å›å¤éœ€æ±‚çš„å¼‚æ­¥æ¶ˆæ¯å‘é€åŠŸèƒ½
+	// ç‰¹æ€§ï¼š
+	// - æ”¯æŒå¤šç§æ¶ˆæ¯æ ¼å¼ï¼ˆiovã€Msgã€å¸¦ä»£ç çš„ Msgï¼‰
+	// - ç»§æ‰¿ AsyncSender çš„çº¿ç¨‹å®‰å…¨å’Œé˜Ÿåˆ—ç®¡ç†
 	class AsyncSenderNoReturn : public AsyncSender
 	{
 	public:
-		// Òì²½·¢ËÍ I/O ÏòÁ¿Êı¾İ
-		// ²ÎÊı£ºiov - I/O ÏòÁ¿
+		// å¼‚æ­¥å‘é€ I/O å‘é‡æ•°æ®
+		// å‚æ•°ï¼šiov - I/O å‘é‡
 		void async_send(const nng_iov& iov) noexcept {
 			MSG_ITEM mi;
 			mi._Msg = Msg(iov);
 			_Send(std::move(mi));
 		}
 
-		// Òì²½·¢ËÍÏûÏ¢
-		// ²ÎÊı£ºmsg - Òª·¢ËÍµÄ Msg ¶ÔÏó
+		// å¼‚æ­¥å‘é€æ¶ˆæ¯
+		// å‚æ•°ï¼šmsg - è¦å‘é€çš„ Msg å¯¹è±¡
 		void async_send(Msg&& msg) noexcept {
 			MSG_ITEM mi;
 			mi._Msg = std::move(msg);
 			_Send(std::move(mi));
 		}
 
-		// Òì²½·¢ËÍ´øÏûÏ¢´úÂëµÄ I/O ÏòÁ¿Êı¾İ
-		// ²ÎÊı£ºcode - ÏûÏ¢´úÂë£¬iov - I/O ÏòÁ¿
+		// å¼‚æ­¥å‘é€å¸¦æ¶ˆæ¯ä»£ç çš„ I/O å‘é‡æ•°æ®
+		// å‚æ•°ï¼šcode - æ¶ˆæ¯ä»£ç ï¼Œiov - I/O å‘é‡
 		void async_send(Msg::_Ty_msg_code code, const nng_iov& iov) noexcept {
 			MSG_ITEM mi;
 			mi._Msg = Msg(iov);
@@ -219,8 +236,8 @@ namespace nng
 			_Send(std::move(mi));
 		}
 
-		// Òì²½·¢ËÍ´øÏûÏ¢´úÂëµÄÏûÏ¢
-		// ²ÎÊı£ºcode - ÏûÏ¢´úÂë£¬msg - Òª·¢ËÍµÄ Msg ¶ÔÏó
+		// å¼‚æ­¥å‘é€å¸¦æ¶ˆæ¯ä»£ç çš„æ¶ˆæ¯
+		// å‚æ•°ï¼šcode - æ¶ˆæ¯ä»£ç ï¼Œmsg - è¦å‘é€çš„ Msg å¯¹è±¡
 		void async_send(Msg::_Ty_msg_code code, Msg&& msg) noexcept {
 			MSG_ITEM mi;
 			mi._Msg = std::move(msg);
@@ -229,16 +246,16 @@ namespace nng
 		}
 	};
 
-	// AsyncSenderWithReturn Àà£º´ø·µ»ØµÄÒì²½·¢ËÍÆ÷£¬¼Ì³Ğ AsyncSender
-	// ÓÃÍ¾£ºÌá¹©ĞèÒª»Ø¸´µÄÒì²½ÏûÏ¢·¢ËÍ¹¦ÄÜ£¬Ö§³Ö std::future/promise
-	// ÌØĞÔ£º
-	// - Ö§³ÖÒì²½ÏûÏ¢·¢ËÍ²¢Í¨¹ı std::future »ñÈ¡»Ø¸´
-	// - ¼Ì³Ğ AsyncSender µÄÏß³Ì°²È«ºÍ¶ÓÁĞ¹ÜÀí
+	// AsyncSenderWithReturn ç±»ï¼šå¸¦è¿”å›çš„å¼‚æ­¥å‘é€å™¨ï¼Œç»§æ‰¿ AsyncSender
+	// ç”¨é€”ï¼šæä¾›éœ€è¦å›å¤çš„å¼‚æ­¥æ¶ˆæ¯å‘é€åŠŸèƒ½ï¼Œæ”¯æŒ std::future/promise
+	// ç‰¹æ€§ï¼š
+	// - æ”¯æŒå¼‚æ­¥æ¶ˆæ¯å‘é€å¹¶é€šè¿‡ std::future è·å–å›å¤
+	// - ç»§æ‰¿ AsyncSender çš„çº¿ç¨‹å®‰å…¨å’Œé˜Ÿåˆ—ç®¡ç†
 	class AsyncSenderWithReturn : public AsyncSender
 	{
 	public:
-		// Òì²½·¢ËÍ I/O ÏòÁ¿Êı¾İ²¢µÈ´ı»Ø¸´
-		// ²ÎÊı£ºiov - I/O ÏòÁ¿£¬promise - ÓÃÓÚ´æ´¢»Ø¸´µÄ³ĞÅµ
+		// å¼‚æ­¥å‘é€ I/O å‘é‡æ•°æ®å¹¶ç­‰å¾…å›å¤
+		// å‚æ•°ï¼šiov - I/O å‘é‡ï¼Œpromise - ç”¨äºå­˜å‚¨å›å¤çš„æ‰¿è¯º
 		void async_send(const nng_iov& iov, std::promise<Msg>&& promise) noexcept {
 			MSG_ITEM mi;
 			mi._Msg = Msg(iov);
@@ -246,8 +263,8 @@ namespace nng
 			_Send(std::move(mi));
 		}
 
-		// Òì²½·¢ËÍÏûÏ¢²¢µÈ´ı»Ø¸´
-		// ²ÎÊı£ºmsg - Òª·¢ËÍµÄ Msg ¶ÔÏó£¬promise - ÓÃÓÚ´æ´¢»Ø¸´µÄ³ĞÅµ
+		// å¼‚æ­¥å‘é€æ¶ˆæ¯å¹¶ç­‰å¾…å›å¤
+		// å‚æ•°ï¼šmsg - è¦å‘é€çš„ Msg å¯¹è±¡ï¼Œpromise - ç”¨äºå­˜å‚¨å›å¤çš„æ‰¿è¯º
 		void async_send(Msg&& msg, std::promise<Msg>&& promise) noexcept {
 			MSG_ITEM mi;
 			mi._Msg = std::move(msg);
@@ -255,8 +272,8 @@ namespace nng
 			_Send(std::move(mi));
 		}
 
-		// Òì²½·¢ËÍ´øÏûÏ¢´úÂëµÄ I/O ÏòÁ¿Êı¾İ²¢µÈ´ı»Ø¸´
-		// ²ÎÊı£ºcode - ÏûÏ¢´úÂë£¬iov - I/O ÏòÁ¿£¬promise - ÓÃÓÚ´æ´¢»Ø¸´µÄ³ĞÅµ
+		// å¼‚æ­¥å‘é€å¸¦æ¶ˆæ¯ä»£ç çš„ I/O å‘é‡æ•°æ®å¹¶ç­‰å¾…å›å¤
+		// å‚æ•°ï¼šcode - æ¶ˆæ¯ä»£ç ï¼Œiov - I/O å‘é‡ï¼Œpromise - ç”¨äºå­˜å‚¨å›å¤çš„æ‰¿è¯º
 		void async_send(Msg::_Ty_msg_code code, const nng_iov& iov, std::promise<Msg>&& promise) noexcept {
 			MSG_ITEM mi;
 			mi._Msg = Msg(iov);
@@ -265,8 +282,8 @@ namespace nng
 			_Send(std::move(mi));
 		}
 
-		// Òì²½·¢ËÍ´øÏûÏ¢´úÂëµÄÏûÏ¢²¢µÈ´ı»Ø¸´
-		// ²ÎÊı£ºcode - ÏûÏ¢´úÂë£¬msg - Òª·¢ËÍµÄ Msg ¶ÔÏó£¬promise - ÓÃÓÚ´æ´¢»Ø¸´µÄ³ĞÅµ
+		// å¼‚æ­¥å‘é€å¸¦æ¶ˆæ¯ä»£ç çš„æ¶ˆæ¯å¹¶ç­‰å¾…å›å¤
+		// å‚æ•°ï¼šcode - æ¶ˆæ¯ä»£ç ï¼Œmsg - è¦å‘é€çš„ Msg å¯¹è±¡ï¼Œpromise - ç”¨äºå­˜å‚¨å›å¤çš„æ‰¿è¯º
 		void async_send(Msg::_Ty_msg_code code, Msg&& msg, std::promise<Msg>&& promise) noexcept {
 			MSG_ITEM mi;
 			mi._Msg = std::move(msg);
@@ -275,9 +292,9 @@ namespace nng
 			_Send(std::move(mi));
 		}
 
-		// Òì²½·¢ËÍÏûÏ¢²¢·µ»Ø future
-		// ²ÎÊı£ºmsg - Òª·¢ËÍµÄ Msg ¶ÔÏó
-		// ·µ»Ø£ºstd::future ÓÃÓÚ»ñÈ¡»Ø¸´ÏûÏ¢
+		// å¼‚æ­¥å‘é€æ¶ˆæ¯å¹¶è¿”å› future
+		// å‚æ•°ï¼šmsg - è¦å‘é€çš„ Msg å¯¹è±¡
+		// è¿”å›ï¼šstd::future ç”¨äºè·å–å›å¤æ¶ˆæ¯
 		std::future<Msg> async_send(Msg&& msg) noexcept(false) {
 			std::promise<Msg> promise;
 			auto future = promise.get_future();
@@ -285,9 +302,9 @@ namespace nng
 			return future;
 		}
 
-		// Òì²½·¢ËÍ´øÏûÏ¢´úÂëµÄÏûÏ¢²¢·µ»Ø future
-		// ²ÎÊı£ºcode - ÏûÏ¢´úÂë£¬msg - Òª·¢ËÍµÄ Msg ¶ÔÏó
-		// ·µ»Ø£ºstd::future ÓÃÓÚ»ñÈ¡»Ø¸´ÏûÏ¢
+		// å¼‚æ­¥å‘é€å¸¦æ¶ˆæ¯ä»£ç çš„æ¶ˆæ¯å¹¶è¿”å› future
+		// å‚æ•°ï¼šcode - æ¶ˆæ¯ä»£ç ï¼Œmsg - è¦å‘é€çš„ Msg å¯¹è±¡
+		// è¿”å›ï¼šstd::future ç”¨äºè·å–å›å¤æ¶ˆæ¯
 		std::future<Msg> async_send(Msg::_Ty_msg_code code, Msg&& msg) noexcept(false) {
 			std::promise<Msg> promise;
 			auto future = promise.get_future();
@@ -299,40 +316,40 @@ namespace nng
 
 namespace nng
 {
-    // Dispatcher Àà£ºÏûÏ¢·Ö·¢»ùÀà£¬Ìá¹©ÏûÏ¢´¦ÀíĞéº¯Êı½Ó¿Ú
-    // ÓÃÍ¾£º¶¨ÒåÏûÏ¢´¦Àí»Øµ÷£¬¹©ÅÉÉúÀàÊµÏÖ¾ßÌå·Ö·¢Âß¼­
-    // ÌØĞÔ£º
-    // - Ìá¹©´¦ÀíÔ­Ê¼ÏûÏ¢ºÍ±àÂëÏûÏ¢µÄĞéº¯Êı
-    // - Ö§³ÖÒì³£´¦Àí»Øµ÷
+    // Dispatcher ç±»ï¼šæ¶ˆæ¯åˆ†å‘åŸºç±»ï¼Œæä¾›æ¶ˆæ¯å¤„ç†è™šå‡½æ•°æ¥å£
+    // ç”¨é€”ï¼šå®šä¹‰æ¶ˆæ¯å¤„ç†å›è°ƒï¼Œä¾›æ´¾ç”Ÿç±»å®ç°å…·ä½“åˆ†å‘é€»è¾‘
+    // ç‰¹æ€§ï¼š
+    // - æä¾›å¤„ç†åŸå§‹æ¶ˆæ¯å’Œç¼–ç æ¶ˆæ¯çš„è™šå‡½æ•°
+    // - æ”¯æŒå¼‚å¸¸å¤„ç†å›è°ƒ
     class Dispatcher
     {
     protected:
-        // Ğéº¯Êı£º´¦ÀíÔ­Ê¼ÏûÏ¢
-        // ²ÎÊı£ºmsg - ½ÓÊÕµÄ Msg ¶ÔÏó
-        // ·µ»Ø£ºtrue ±íÊ¾ÏûÏ¢ÒÑ´¦Àí£¬false ±íÊ¾¼ÌĞø´¦Àí
+        // è™šå‡½æ•°ï¼šå¤„ç†åŸå§‹æ¶ˆæ¯
+        // å‚æ•°ï¼šmsg - æ¥æ”¶çš„ Msg å¯¹è±¡
+        // è¿”å›ï¼štrue è¡¨ç¤ºæ¶ˆæ¯å·²å¤„ç†ï¼Œfalse è¡¨ç¤ºç»§ç»­å¤„ç†
         virtual bool _On_raw_message(Msg& msg) { return false; }
 
-        // Ğéº¯Êı£º´¦Àí±àÂëÏûÏ¢
-        // ²ÎÊı£ºcode - ÏûÏ¢´úÂë£¬msg - ½ÓÊÕµÄ Msg ¶ÔÏó
-        // ·µ»Ø£ºÏûÏ¢´¦Àí½á¹û
+        // è™šå‡½æ•°ï¼šå¤„ç†ç¼–ç æ¶ˆæ¯
+        // å‚æ•°ï¼šcode - æ¶ˆæ¯ä»£ç ï¼Œmsg - æ¥æ”¶çš„ Msg å¯¹è±¡
+        // è¿”å›ï¼šæ¶ˆæ¯å¤„ç†ç»“æœ
         virtual Msg::_Ty_msg_result _On_message(Msg::_Ty_msg_code code, Msg& msg) { return {}; }
 
-        // Ğéº¯Êı£º´¦Àí·Ö·¢Òì³£
-        // ²ÎÊı£ºe - Òì³£¶ÔÏó
-        // ·µ»Ø£ºtrue ±íÊ¾Í£Ö¹·Ö·¢£¬false ±íÊ¾¼ÌĞø
+        // è™šå‡½æ•°ï¼šå¤„ç†åˆ†å‘å¼‚å¸¸
+        // å‚æ•°ï¼še - å¼‚å¸¸å¯¹è±¡
+        // è¿”å›ï¼štrue è¡¨ç¤ºåœæ­¢åˆ†å‘ï¼Œfalse è¡¨ç¤ºç»§ç»­
         virtual bool _On_dispatch_exception(const Exception& e) { return true; }
     };
 
-	// DispatcherNoReturn Àà£ºÎŞ·µ»ØµÄÏûÏ¢·Ö·¢Æ÷£¬¼Ì³Ğ Dispatcher ºÍ Socket
-	// ÓÃÍ¾£º´¦Àí½ÓÊÕµÄÏûÏ¢£¬ÎŞĞè·¢ËÍ»Ø¸´
-	// ÌØĞÔ£º
-	// - Ñ­»·½ÓÊÕ²¢´¦ÀíÏûÏ¢
-	// - Ö§³ÖÒì³£´¦Àí
+	// DispatcherNoReturn ç±»ï¼šæ— è¿”å›çš„æ¶ˆæ¯åˆ†å‘å™¨ï¼Œç»§æ‰¿ Dispatcher å’Œ Socket
+	// ç”¨é€”ï¼šå¤„ç†æ¥æ”¶çš„æ¶ˆæ¯ï¼Œæ— éœ€å‘é€å›å¤
+	// ç‰¹æ€§ï¼š
+	// - å¾ªç¯æ¥æ”¶å¹¶å¤„ç†æ¶ˆæ¯
+	// - æ”¯æŒå¼‚å¸¸å¤„ç†
 	class DispatcherNoReturn : public Dispatcher, virtual public Socket
 	{
 	public:
-		// ·Ö·¢ÏûÏ¢
-		// Ñ­»·½ÓÊÕÏûÏ¢²¢µ÷ÓÃ´¦Àí»Øµ÷£¬Ö±ÖÁÒì³£ÖÕÖ¹
+		// åˆ†å‘æ¶ˆæ¯
+		// å¾ªç¯æ¥æ”¶æ¶ˆæ¯å¹¶è°ƒç”¨å¤„ç†å›è°ƒï¼Œç›´è‡³å¼‚å¸¸ç»ˆæ­¢
 		void dispatch() noexcept {
 			for (;;) {
 				try {
@@ -348,9 +365,9 @@ namespace nng
 		}
 
 	private:
-		// Ğéº¯Êı£º´¦Àí½ÓÊÕµ½µÄÏûÏ¢
-		// ²ÎÊı£ºm - ½ÓÊÕµÄ Msg ¶ÔÏó
-		// ·µ»Ø£ºtrue ±íÊ¾ÏûÏ¢ÒÑ´¦Àí£¬false ±íÊ¾¼ÌĞø´¦Àí
+		// è™šå‡½æ•°ï¼šå¤„ç†æ¥æ”¶åˆ°çš„æ¶ˆæ¯
+		// å‚æ•°ï¼šm - æ¥æ”¶çš„ Msg å¯¹è±¡
+		// è¿”å›ï¼štrue è¡¨ç¤ºæ¶ˆæ¯å·²å¤„ç†ï¼Œfalse è¡¨ç¤ºç»§ç»­å¤„ç†
 		virtual bool _On_receiver_recv(Msg& m) noexcept {
 			if (!_On_raw_message(m)) {
 				auto code = Msg::_Chop_msg_code(m);
@@ -360,16 +377,16 @@ namespace nng
 		}
 	};
 
-	// DispatcherWithReturn Àà£º´ø·µ»ØµÄÏûÏ¢·Ö·¢Æ÷£¬¼Ì³Ğ Dispatcher ºÍ Socket
-	// ÓÃÍ¾£º´¦Àí½ÓÊÕµÄÏûÏ¢²¢·¢ËÍ»Ø¸´
-	// ÌØĞÔ£º
-	// - Ñ­»·½ÓÊÕ¡¢´¦ÀíÏûÏ¢²¢·¢ËÍ»Ø¸´
-	// - Ö§³ÖÒì³£´¦Àí
+	// DispatcherWithReturn ç±»ï¼šå¸¦è¿”å›çš„æ¶ˆæ¯åˆ†å‘å™¨ï¼Œç»§æ‰¿ Dispatcher å’Œ Socket
+	// ç”¨é€”ï¼šå¤„ç†æ¥æ”¶çš„æ¶ˆæ¯å¹¶å‘é€å›å¤
+	// ç‰¹æ€§ï¼š
+	// - å¾ªç¯æ¥æ”¶ã€å¤„ç†æ¶ˆæ¯å¹¶å‘é€å›å¤
+	// - æ”¯æŒå¼‚å¸¸å¤„ç†
 	class DispatcherWithReturn : public Dispatcher, virtual public Socket
 	{
 	public:
-		// ·Ö·¢ÏûÏ¢
-		// Ñ­»·½ÓÊÕÏûÏ¢¡¢´¦Àí²¢·¢ËÍ»Ø¸´£¬Ö±ÖÁÒì³£ÖÕÖ¹
+		// åˆ†å‘æ¶ˆæ¯
+		// å¾ªç¯æ¥æ”¶æ¶ˆæ¯ã€å¤„ç†å¹¶å‘é€å›å¤ï¼Œç›´è‡³å¼‚å¸¸ç»ˆæ­¢
 		void dispatch() noexcept {
 			for (;;) {
 				try {
@@ -386,9 +403,9 @@ namespace nng
 		}
 
 	private:
-		// Ğéº¯Êı£º´¦Àí½ÓÊÕµ½µÄÏûÏ¢
-		// ²ÎÊı£ºm - ½ÓÊÕµÄ Msg ¶ÔÏó
-		// ·µ»Ø£ºtrue ±íÊ¾ÏûÏ¢ÒÑ´¦Àí£¬false ±íÊ¾¼ÌĞø´¦Àí
+		// è™šå‡½æ•°ï¼šå¤„ç†æ¥æ”¶åˆ°çš„æ¶ˆæ¯
+		// å‚æ•°ï¼šm - æ¥æ”¶çš„ Msg å¯¹è±¡
+		// è¿”å›ï¼štrue è¡¨ç¤ºæ¶ˆæ¯å·²å¤„ç†ï¼Œfalse è¡¨ç¤ºç»§ç»­å¤„ç†
 		virtual bool _On_receiver_recv(Msg& m) noexcept {
 			if (!_On_raw_message(m)) {
 				auto code = Msg::_Chop_msg_code(m);
@@ -402,31 +419,31 @@ namespace nng
 
 namespace nng
 {
-	// Pull Àà£ºPull Ğ­ÒéµÄÄ£°åÀà£¬¼Ì³Ğ Peer¡¢Socket ºÍ DispatcherNoReturn
-	// ÓÃÍ¾£ºÊµÏÖ Pull Ğ­ÒéµÄÒì²½ÏûÏ¢½ÓÊÕ
-	// ÌØĞÔ£º
-	// - Ö§³Ö Listener »ò Dialer Á¬½ÓÆ÷
-	// - Ìá¹©ÎŞ·µ»ØµÄÏûÏ¢·Ö·¢
+	// Pull ç±»ï¼šPull åè®®çš„æ¨¡æ¿ç±»ï¼Œç»§æ‰¿ Peerã€Socket å’Œ DispatcherNoReturn
+	// ç”¨é€”ï¼šå®ç° Pull åè®®çš„å¼‚æ­¥æ¶ˆæ¯æ¥æ”¶
+	// ç‰¹æ€§ï¼š
+	// - æ”¯æŒ Listener æˆ– Dialer è¿æ¥å™¨
+	// - æä¾›æ— è¿”å›çš„æ¶ˆæ¯åˆ†å‘
 	template <class _Connector_t = Listener>
 	class Pull : public Peer<_Connector_t>, virtual public Socket, public DispatcherNoReturn
 	{
-		// ´´½¨ Pull Ğ­ÒéÌ×½Ó×Ö
-		// ·µ»Ø£º²Ù×÷½á¹û£¬0 ±íÊ¾³É¹¦
+		// åˆ›å»º Pull åè®®å¥—æ¥å­—
+		// è¿”å›ï¼šæ“ä½œç»“æœï¼Œ0 è¡¨ç¤ºæˆåŠŸ
 		virtual int _Create() noexcept override {
 			return Socket::create(nng_pull0_open);
 		}
 	};
 
-	// Push Àà£ºPush Ğ­ÒéµÄÄ£°åÀà£¬¼Ì³Ğ Peer¡¢Socket ºÍ AsyncSenderNoReturn
-	// ÓÃÍ¾£ºÊµÏÖ Push Ğ­ÒéµÄÒì²½ÏûÏ¢·¢ËÍ
-	// ÌØĞÔ£º
-	// - Ö§³Ö Listener »ò Dialer Á¬½ÓÆ÷
-	// - Ìá¹©ÎŞ·µ»ØµÄÒì²½·¢ËÍ
+	// Push ç±»ï¼šPush åè®®çš„æ¨¡æ¿ç±»ï¼Œç»§æ‰¿ Peerã€Socket å’Œ AsyncSenderNoReturn
+	// ç”¨é€”ï¼šå®ç° Push åè®®çš„å¼‚æ­¥æ¶ˆæ¯å‘é€
+	// ç‰¹æ€§ï¼š
+	// - æ”¯æŒ Listener æˆ– Dialer è¿æ¥å™¨
+	// - æä¾›æ— è¿”å›çš„å¼‚æ­¥å‘é€
 	template <class _Connector_t = Dialer>
 	class Push : public Peer<_Connector_t>, virtual public Socket, public AsyncSenderNoReturn
 	{
-		// ´´½¨ Push Ğ­ÒéÌ×½Ó×Ö
-		// ·µ»Ø£º²Ù×÷½á¹û£¬0 ±íÊ¾³É¹¦
+		// åˆ›å»º Push åè®®å¥—æ¥å­—
+		// è¿”å›ï¼šæ“ä½œç»“æœï¼Œ0 è¡¨ç¤ºæˆåŠŸ
 		virtual int _Create() noexcept override {
 			return Socket::create(nng_push0_open);
 		}
@@ -435,16 +452,16 @@ namespace nng
 
 namespace nng
 {
-	// Pair Àà£ºPair Ğ­ÒéµÄÄ£°åÀà£¬¼Ì³Ğ Peer¡¢Socket¡¢DispatcherNoReturn ºÍ AsyncSenderNoReturn
-	// ÓÃÍ¾£ºÊµÏÖ Pair Ğ­ÒéµÄÒì²½ÏûÏ¢·¢ËÍºÍ½ÓÊÕ
-	// ÌØĞÔ£º
-	// - Ö§³Ö Listener »ò Dialer Á¬½ÓÆ÷
-	// - Ìá¹©ÎŞ·µ»ØµÄ·¢ËÍºÍ·Ö·¢
+	// Pair ç±»ï¼šPair åè®®çš„æ¨¡æ¿ç±»ï¼Œç»§æ‰¿ Peerã€Socketã€DispatcherNoReturn å’Œ AsyncSenderNoReturn
+	// ç”¨é€”ï¼šå®ç° Pair åè®®çš„å¼‚æ­¥æ¶ˆæ¯å‘é€å’Œæ¥æ”¶
+	// ç‰¹æ€§ï¼š
+	// - æ”¯æŒ Listener æˆ– Dialer è¿æ¥å™¨
+	// - æä¾›æ— è¿”å›çš„å‘é€å’Œåˆ†å‘
 	template <class _Connector_t>
 	class Pair : public Peer<_Connector_t>, virtual public Socket, public DispatcherNoReturn, public AsyncSenderNoReturn
 	{
-		// ´´½¨ Pair Ğ­ÒéÌ×½Ó×Ö
-		// ·µ»Ø£º²Ù×÷½á¹û£¬0 ±íÊ¾³É¹¦
+		// åˆ›å»º Pair åè®®å¥—æ¥å­—
+		// è¿”å›ï¼šæ“ä½œç»“æœï¼Œ0 è¡¨ç¤ºæˆåŠŸ
 		virtual int _Create() noexcept override {
 			return Socket::create(nng_pair0_open);
 		}
@@ -453,37 +470,37 @@ namespace nng
 
 namespace nng
 {
-	// Response Àà£ºRep Ğ­ÒéÀà£¬¼Ì³Ğ Peer ºÍ DispatcherWithReturn
-	// ÓÃÍ¾£ºÊµÏÖ Rep Ğ­ÒéµÄÏûÏ¢½ÓÊÕºÍ»Ø¸´
-	// ÌØĞÔ£º
-	// - Ê¹ÓÃ Listener Á¬½ÓÆ÷
-	// - Ìá¹©´ø·µ»ØµÄÏûÏ¢·Ö·¢
+	// Response ç±»ï¼šRep åè®®ç±»ï¼Œç»§æ‰¿ Peer å’Œ DispatcherWithReturn
+	// ç”¨é€”ï¼šå®ç° Rep åè®®çš„æ¶ˆæ¯æ¥æ”¶å’Œå›å¤
+	// ç‰¹æ€§ï¼š
+	// - ä½¿ç”¨ Listener è¿æ¥å™¨
+	// - æä¾›å¸¦è¿”å›çš„æ¶ˆæ¯åˆ†å‘
 	class Response : public Peer<Listener>, virtual public Socket, public DispatcherWithReturn
 	{
-		// ´´½¨ Rep Ğ­ÒéÌ×½Ó×Ö
-		// ·µ»Ø£º²Ù×÷½á¹û£¬0 ±íÊ¾³É¹¦
+		// åˆ›å»º Rep åè®®å¥—æ¥å­—
+		// è¿”å›ï¼šæ“ä½œç»“æœï¼Œ0 è¡¨ç¤ºæˆåŠŸ
 		virtual int _Create() noexcept override {
 			return Socket::create(nng_rep0_open);
 		}
 	};
 
-	// Request Àà£ºReq Ğ­ÒéÀà£¬¼Ì³Ğ Peer ºÍ AsyncSenderWithReturn
-	// ÓÃÍ¾£ºÊµÏÖ Req Ğ­ÒéµÄÒì²½ÏûÏ¢·¢ËÍºÍ»Ø¸´½ÓÊÕ
-	// ÌØĞÔ£º
-	// - Ê¹ÓÃ Dialer Á¬½ÓÆ÷
-	// - Ìá¹©´ø·µ»ØµÄÒì²½·¢ËÍ
+	// Request ç±»ï¼šReq åè®®ç±»ï¼Œç»§æ‰¿ Peer å’Œ AsyncSenderWithReturn
+	// ç”¨é€”ï¼šå®ç° Req åè®®çš„å¼‚æ­¥æ¶ˆæ¯å‘é€å’Œå›å¤æ¥æ”¶
+	// ç‰¹æ€§ï¼š
+	// - ä½¿ç”¨ Dialer è¿æ¥å™¨
+	// - æä¾›å¸¦è¿”å›çš„å¼‚æ­¥å‘é€
 	class Request : public Peer<Dialer>, virtual public Socket, public AsyncSenderWithReturn
 	{
-		// ´´½¨ Req Ğ­ÒéÌ×½Ó×Ö
-		// ·µ»Ø£º²Ù×÷½á¹û£¬0 ±íÊ¾³É¹¦
+		// åˆ›å»º Req åè®®å¥—æ¥å­—
+		// è¿”å›ï¼šæ“ä½œç»“æœï¼Œ0 è¡¨ç¤ºæˆåŠŸ
 		virtual int _Create() noexcept override {
 			return Socket::create(nng_req0_open);
 		}
 
 	public:
-		// ¼òµ¥·¢ËÍÏûÏ¢²¢½ÓÊÕ»Ø¸´
-		// ²ÎÊı£ºaddr - Á¬½ÓµØÖ·£¬msg - ÏûÏ¢¶ÔÏó£¬pre_send - ·¢ËÍÇ°»Øµ÷
-		// ·µ»Ø£º²Ù×÷½á¹û£¬0 ±íÊ¾³É¹¦
+		// ç®€å•å‘é€æ¶ˆæ¯å¹¶æ¥æ”¶å›å¤
+		// å‚æ•°ï¼šaddr - è¿æ¥åœ°å€ï¼Œmsg - æ¶ˆæ¯å¯¹è±¡ï¼Œpre_send - å‘é€å‰å›è°ƒ
+		// è¿”å›ï¼šæ“ä½œç»“æœï¼Œ0 è¡¨ç¤ºæˆåŠŸ
 		static int simple_send(std::string_view addr, Msg& msg, std::function<void(Request&)> pre_send = {}) noexcept(false) {
 			Request req;
 			int rv = req.start(addr);
@@ -498,10 +515,10 @@ namespace nng
 			return req.send(msg);
 		}
 
-		// ¼òµ¥·¢ËÍ´øÏûÏ¢´úÂëµÄÏûÏ¢²¢½ÓÊÕ½á¹û
-		// ²ÎÊı£ºaddr - Á¬½ÓµØÖ·£¬code - ÏûÏ¢´úÂë£¬msg - ÏûÏ¢¶ÔÏó£¬pre_send - ·¢ËÍÇ°»Øµ÷
-		// ·µ»Ø£ºÏûÏ¢´¦Àí½á¹û
-		// Òì³££ºÈô´´½¨»ò·¢ËÍÊ§°Ü£¬Å×³ö Exception
+		// ç®€å•å‘é€å¸¦æ¶ˆæ¯ä»£ç çš„æ¶ˆæ¯å¹¶æ¥æ”¶ç»“æœ
+		// å‚æ•°ï¼šaddr - è¿æ¥åœ°å€ï¼Œcode - æ¶ˆæ¯ä»£ç ï¼Œmsg - æ¶ˆæ¯å¯¹è±¡ï¼Œpre_send - å‘é€å‰å›è°ƒ
+		// è¿”å›ï¼šæ¶ˆæ¯å¤„ç†ç»“æœ
+		// å¼‚å¸¸ï¼šè‹¥åˆ›å»ºæˆ–å‘é€å¤±è´¥ï¼ŒæŠ›å‡º Exception
 		static Msg::_Ty_msg_result simple_send(std::string_view addr, Msg::_Ty_msg_code code, Msg& msg, std::function<void(Request&)> pre_send = {}) noexcept(false) {
 			Request req;
 			int rv = req.start(addr);
@@ -521,31 +538,31 @@ namespace nng
 
 namespace nng
 {
-	// Publisher Àà£ºPub Ğ­ÒéµÄÄ£°åÀà£¬¼Ì³Ğ Peer ºÍ AsyncSenderNoReturn
-	// ÓÃÍ¾£ºÊµÏÖ Pub Ğ­ÒéµÄÒì²½ÏûÏ¢·¢²¼
-	// ÌØĞÔ£º
-	// - Ö§³Ö Listener »ò Dialer Á¬½ÓÆ÷
-	// - Ìá¹©ÎŞ·µ»ØµÄÒì²½·¢ËÍ
+	// Publisher ç±»ï¼šPub åè®®çš„æ¨¡æ¿ç±»ï¼Œç»§æ‰¿ Peer å’Œ AsyncSenderNoReturn
+	// ç”¨é€”ï¼šå®ç° Pub åè®®çš„å¼‚æ­¥æ¶ˆæ¯å‘å¸ƒ
+	// ç‰¹æ€§ï¼š
+	// - æ”¯æŒ Listener æˆ– Dialer è¿æ¥å™¨
+	// - æä¾›æ— è¿”å›çš„å¼‚æ­¥å‘é€
 	template <class _Connector_t = Listener>
 	class Publisher : public Peer<_Connector_t>, virtual public Socket, public AsyncSenderNoReturn
 	{
-		// ´´½¨ Pub Ğ­ÒéÌ×½Ó×Ö
-		// ·µ»Ø£º²Ù×÷½á¹û£¬0 ±íÊ¾³É¹¦
+		// åˆ›å»º Pub åè®®å¥—æ¥å­—
+		// è¿”å›ï¼šæ“ä½œç»“æœï¼Œ0 è¡¨ç¤ºæˆåŠŸ
 		virtual int _Create() noexcept override {
 			return Socket::create(nng_pub0_open);
 		}
 	};
 
-	// Subscriber Àà£ºSub Ğ­ÒéµÄÄ£°åÀà£¬¼Ì³Ğ Peer ºÍ DispatcherNoReturn
-	// ÓÃÍ¾£ºÊµÏÖ Sub Ğ­ÒéµÄÒì²½ÏûÏ¢¶©ÔÄ
-	// ÌØĞÔ£º
-	// - Ö§³Ö Listener »ò Dialer Á¬½ÓÆ÷
-	// - Ìá¹©ÎŞ·µ»ØµÄÏûÏ¢·Ö·¢
+	// Subscriber ç±»ï¼šSub åè®®çš„æ¨¡æ¿ç±»ï¼Œç»§æ‰¿ Peer å’Œ DispatcherNoReturn
+	// ç”¨é€”ï¼šå®ç° Sub åè®®çš„å¼‚æ­¥æ¶ˆæ¯è®¢é˜…
+	// ç‰¹æ€§ï¼š
+	// - æ”¯æŒ Listener æˆ– Dialer è¿æ¥å™¨
+	// - æä¾›æ— è¿”å›çš„æ¶ˆæ¯åˆ†å‘
 	template <class _Connector_t = Dialer>
 	class Subscriber : public Peer<_Connector_t>, virtual public Socket, public DispatcherNoReturn
 	{
-		// ´´½¨ Sub Ğ­ÒéÌ×½Ó×Ö
-		// ·µ»Ø£º²Ù×÷½á¹û£¬0 ±íÊ¾³É¹¦
+		// åˆ›å»º Sub åè®®å¥—æ¥å­—
+		// è¿”å›ï¼šæ“ä½œç»“æœï¼Œ0 è¡¨ç¤ºæˆåŠŸ
 		virtual int _Create() noexcept override {
 			return Socket::create(nng_sub0_open);
 		}
@@ -555,25 +572,25 @@ namespace nng
 
 namespace nng
 {
-	// Survey Àà£ºSurveyor Ğ­ÒéµÄÄ£°åÀà£¬¼Ì³Ğ Peer ºÍ AsyncSenderWithReturn
-	// ÓÃÍ¾£ºÊµÏÖ Surveyor Ğ­ÒéµÄÒì²½ÏûÏ¢·¢ËÍºÍ¶à»Ø¸´½ÓÊÕ
-	// ÌØĞÔ£º
-	// - Ö§³Ö Listener »ò Dialer Á¬½ÓÆ÷
-	// - Ìá¹©´ø·µ»ØµÄÒì²½·¢ËÍ
+	// Survey ç±»ï¼šSurveyor åè®®çš„æ¨¡æ¿ç±»ï¼Œç»§æ‰¿ Peer å’Œ AsyncSenderWithReturn
+	// ç”¨é€”ï¼šå®ç° Surveyor åè®®çš„å¼‚æ­¥æ¶ˆæ¯å‘é€å’Œå¤šå›å¤æ¥æ”¶
+	// ç‰¹æ€§ï¼š
+	// - æ”¯æŒ Listener æˆ– Dialer è¿æ¥å™¨
+	// - æä¾›å¸¦è¿”å›çš„å¼‚æ­¥å‘é€
 	template <class _Connector_t = Listener>
 	class Survey : public Peer<_Connector_t>, virtual public Socket, public AsyncSenderWithReturn
 	{
-		// ´´½¨ Surveyor Ğ­ÒéÌ×½Ó×Ö
-		// ·µ»Ø£º²Ù×÷½á¹û£¬0 ±íÊ¾³É¹¦
+		// åˆ›å»º Surveyor åè®®å¥—æ¥å­—
+		// è¿”å›ï¼šæ“ä½œç»“æœï¼Œ0 è¡¨ç¤ºæˆåŠŸ
 		virtual int _Create() noexcept override {
 			return Socket::create(nng_surveyor0_open);
 		}
 
 	public:
-		// ·¢ËÍÏûÏ¢²¢½ÓÊÕ¶à¸ö»Ø¸´
-		// ²ÎÊı£ºmsg - Òª·¢ËÍµÄ Msg ¶ÔÏó£¬iter - µü´úÆ÷ÓÃÓÚ´æ´¢»Ø¸´
-		// ·µ»Ø£º²Ù×÷½á¹û£¬0 ±íÊ¾³É¹¦
-		// Òì³££ºÈô½ÓÊÕ³¬Ê±ÒÔÍâµÄ´íÎó£¬Å×³ö Exception
+		// å‘é€æ¶ˆæ¯å¹¶æ¥æ”¶å¤šä¸ªå›å¤
+		// å‚æ•°ï¼šmsg - è¦å‘é€çš„ Msg å¯¹è±¡ï¼Œiter - è¿­ä»£å™¨ç”¨äºå­˜å‚¨å›å¤
+		// è¿”å›ï¼šæ“ä½œç»“æœï¼Œ0 è¡¨ç¤ºæˆåŠŸ
+		// å¼‚å¸¸ï¼šè‹¥æ¥æ”¶è¶…æ—¶ä»¥å¤–çš„é”™è¯¯ï¼ŒæŠ›å‡º Exception
 		template <typename _Iter_t>
 		int send(Msg&& msg, _Iter_t iter) noexcept(false) {
 			int rv = Socket::send(std::move(msg));
@@ -597,10 +614,10 @@ namespace nng
 			return rv;
 		}
 
-		// ·¢ËÍ´øÏûÏ¢´úÂëµÄÏûÏ¢²¢½ÓÊÕ¶à¸ö»Ø¸´
-		// ²ÎÊı£ºcode - ÏûÏ¢´úÂë£¬msg - Òª·¢ËÍµÄ Msg ¶ÔÏó£¬iter - µü´úÆ÷ÓÃÓÚ´æ´¢»Ø¸´
-		// ·µ»Ø£º²Ù×÷½á¹û£¬0 ±íÊ¾³É¹¦
-		// Òì³££ºÈô½ÓÊÕ³¬Ê±ÒÔÍâµÄ´íÎó£¬Å×³ö Exception
+		// å‘é€å¸¦æ¶ˆæ¯ä»£ç çš„æ¶ˆæ¯å¹¶æ¥æ”¶å¤šä¸ªå›å¤
+		// å‚æ•°ï¼šcode - æ¶ˆæ¯ä»£ç ï¼Œmsg - è¦å‘é€çš„ Msg å¯¹è±¡ï¼Œiter - è¿­ä»£å™¨ç”¨äºå­˜å‚¨å›å¤
+		// è¿”å›ï¼šæ“ä½œç»“æœï¼Œ0 è¡¨ç¤ºæˆåŠŸ
+		// å¼‚å¸¸ï¼šè‹¥æ¥æ”¶è¶…æ—¶ä»¥å¤–çš„é”™è¯¯ï¼ŒæŠ›å‡º Exception
 		template <typename _Iter_t>
 		int send(Msg::_Ty_msg_code code, Msg&& msg, _Iter_t iter) noexcept(false) {
 			Msg::_Append_msg_code(msg, code);
@@ -608,16 +625,16 @@ namespace nng
 		}
 	};
 
-	// Respond Àà£ºRespondent Ğ­ÒéµÄÄ£°åÀà£¬¼Ì³Ğ Peer ºÍ DispatcherWithReturn
-	// ÓÃÍ¾£ºÊµÏÖ Respondent Ğ­ÒéµÄÏûÏ¢½ÓÊÕºÍ»Ø¸´
-	// ÌØĞÔ£º
-	// - Ö§³Ö Listener »ò Dialer Á¬½ÓÆ÷
-	// - Ìá¹©´ø·µ»ØµÄÏûÏ¢·Ö·¢
+	// Respond ç±»ï¼šRespondent åè®®çš„æ¨¡æ¿ç±»ï¼Œç»§æ‰¿ Peer å’Œ DispatcherWithReturn
+	// ç”¨é€”ï¼šå®ç° Respondent åè®®çš„æ¶ˆæ¯æ¥æ”¶å’Œå›å¤
+	// ç‰¹æ€§ï¼š
+	// - æ”¯æŒ Listener æˆ– Dialer è¿æ¥å™¨
+	// - æä¾›å¸¦è¿”å›çš„æ¶ˆæ¯åˆ†å‘
 	template <class _Connector_t = Dialer>
 	class Respond : public Peer<_Connector_t>, virtual public Socket, public DispatcherWithReturn
 	{
-		// ´´½¨ Respondent Ğ­ÒéÌ×½Ó×Ö
-		// ·µ»Ø£º²Ù×÷½á¹û£¬0 ±íÊ¾³É¹¦
+		// åˆ›å»º Respondent åè®®å¥—æ¥å­—
+		// è¿”å›ï¼šæ“ä½œç»“æœï¼Œ0 è¡¨ç¤ºæˆåŠŸ
 		virtual int _Create() noexcept override {
 			return Socket::create(nng_respondent0_open);
 		}
@@ -626,24 +643,24 @@ namespace nng
 
 namespace nng
 {
-	// Bus Àà£ºBus Ğ­ÒéÀà£¬¼Ì³Ğ Peer¡¢Socket¡¢DispatcherNoReturn ºÍ AsyncSenderNoReturn
-	// ÓÃÍ¾£ºÊµÏÖ Bus Ğ­ÒéµÄÒì²½ÏûÏ¢·¢ËÍºÍ½ÓÊÕ
-	// ÌØĞÔ£º
-	// - Ê¹ÓÃ Listener Á¬½ÓÆ÷£¬Ö§³Ö¶¯Ì¬Ìí¼Ó Dialer
-	// - Ìá¹©ÎŞ·µ»ØµÄ·¢ËÍºÍ·Ö·¢
+	// Bus ç±»ï¼šBus åè®®ç±»ï¼Œç»§æ‰¿ Peerã€Socketã€DispatcherNoReturn å’Œ AsyncSenderNoReturn
+	// ç”¨é€”ï¼šå®ç° Bus åè®®çš„å¼‚æ­¥æ¶ˆæ¯å‘é€å’Œæ¥æ”¶
+	// ç‰¹æ€§ï¼š
+	// - ä½¿ç”¨ Listener è¿æ¥å™¨ï¼Œæ”¯æŒåŠ¨æ€æ·»åŠ  Dialer
+	// - æä¾›æ— è¿”å›çš„å‘é€å’Œåˆ†å‘
 	class Bus : public Peer<Listener>, virtual public Socket, public DispatcherNoReturn, public AsyncSenderNoReturn
 	{
-		// ´´½¨ Bus Ğ­ÒéÌ×½Ó×Ö
-		// ·µ»Ø£º²Ù×÷½á¹û£¬0 ±íÊ¾³É¹¦
+		// åˆ›å»º Bus åè®®å¥—æ¥å­—
+		// è¿”å›ï¼šæ“ä½œç»“æœï¼Œ0 è¡¨ç¤ºæˆåŠŸ
 		virtual int _Create() noexcept override {
 			return Socket::create(nng_bus0_open);
 		}
 
 	public:
-		// Ìí¼Ó²¦ºÅÆ÷²¢Á¬½Ó
-		// ²ÎÊı£ºaddr - Á¬½ÓµØÖ·
-		// ·µ»Ø£º²Ù×÷½á¹û£¬0 ±íÊ¾³É¹¦
-		// Òì³££ºÈô²¦ºÅÆ÷´´½¨Ê§°Ü£¬Å×³ö Exception
+		// æ·»åŠ æ‹¨å·å™¨å¹¶è¿æ¥
+		// å‚æ•°ï¼šaddr - è¿æ¥åœ°å€
+		// è¿”å›ï¼šæ“ä½œç»“æœï¼Œ0 è¡¨ç¤ºæˆåŠŸ
+		// å¼‚å¸¸ï¼šè‹¥æ‹¨å·å™¨åˆ›å»ºå¤±è´¥ï¼ŒæŠ›å‡º Exception
 		int dial(std::string_view addr) noexcept(false) {
 
 			Dialer dialer(*this, addr);
@@ -664,16 +681,16 @@ namespace nng
 
 namespace nng
 {
-	// ResponseParallel Àà£º²¢ĞĞ Rep Ğ­ÒéÀà£¬¼Ì³Ğ Peer ºÍ DispatcherWithReturn
-	// ÓÃÍ¾£ºÊµÏÖ Rep Ğ­ÒéµÄ²¢ĞĞÏûÏ¢´¦Àí£¬Ö§³Ö¶à¸ö¹¤×÷Ïî
-	// ÌØĞÔ£º
-	// - Ê¹ÓÃ Listener Á¬½ÓÆ÷
-	// - Í¨¹ı¶à¸ö¹¤×÷Ïî£¨WORK_ITEM£©²¢ĞĞ´¦ÀíÏûÏ¢
-	// - Ìá¹©´ø·µ»ØµÄÏûÏ¢·Ö·¢
+	// ResponseParallel ç±»ï¼šå¹¶è¡Œ Rep åè®®ç±»ï¼Œç»§æ‰¿ Peer å’Œ DispatcherWithReturn
+	// ç”¨é€”ï¼šå®ç° Rep åè®®çš„å¹¶è¡Œæ¶ˆæ¯å¤„ç†ï¼Œæ”¯æŒå¤šä¸ªå·¥ä½œé¡¹
+	// ç‰¹æ€§ï¼š
+	// - ä½¿ç”¨ Listener è¿æ¥å™¨
+	// - é€šè¿‡å¤šä¸ªå·¥ä½œé¡¹ï¼ˆWORK_ITEMï¼‰å¹¶è¡Œå¤„ç†æ¶ˆæ¯
+	// - æä¾›å¸¦è¿”å›çš„æ¶ˆæ¯åˆ†å‘
 	class ResponseParallel : public Peer<Listener>, virtual public Socket, public DispatcherWithReturn
 	{
-		// ´´½¨ Rep Ğ­ÒéÌ×½Ó×Ö
-		// ·µ»Ø£º²Ù×÷½á¹û£¬0 ±íÊ¾³É¹¦
+		// åˆ›å»º Rep åè®®å¥—æ¥å­—
+		// è¿”å›ï¼šæ“ä½œç»“æœï¼Œ0 è¡¨ç¤ºæˆåŠŸ
 		virtual int _Create() noexcept override {
 			return Socket::create(nng_rep0_open);
 		}
@@ -693,29 +710,29 @@ namespace nng
 			Msg _Msg;
 			void* _Owner;
 
-			// ¹¤×÷Ïî¹¹Ôìº¯Êı
-			// ²ÎÊı£ºsocket - Ì×½Ó×Ö£¬callback - »Øµ÷º¯Êı£¬owner - ¸¸¶ÔÏó
-			// Òì³££ºÈô Aio »ò Ctx ´´½¨Ê§°Ü£¬Å×³ö Exception
+			// å·¥ä½œé¡¹æ„é€ å‡½æ•°
+			// å‚æ•°ï¼šsocket - å¥—æ¥å­—ï¼Œcallback - å›è°ƒå‡½æ•°ï¼Œowner - çˆ¶å¯¹è±¡
+			// å¼‚å¸¸ï¼šè‹¥ Aio æˆ– Ctx åˆ›å»ºå¤±è´¥ï¼ŒæŠ›å‡º Exception
 			explicit _WORK_ITEM(nng_socket socket, void (*callback)(void*), void* owner) noexcept(false)
 				: _Aio(callback, this), _Ctx(socket), _Owner(owner) {
 			}
 
-			// Òì²½·¢ËÍÏûÏ¢
-			// ²ÎÊı£ºmsg - Òª·¢ËÍµÄ Msg ¶ÔÏó
+			// å¼‚æ­¥å‘é€æ¶ˆæ¯
+			// å‚æ•°ï¼šmsg - è¦å‘é€çš„ Msg å¯¹è±¡
 			inline void send() noexcept {
 				send(std::move(_Msg));
 			}
 
-			// Òì²½·¢ËÍÏûÏ¢
-			// ²ÎÊı£ºmsg - Òª·¢ËÍµÄ Msg ¶ÔÏó
+			// å¼‚æ­¥å‘é€æ¶ˆæ¯
+			// å‚æ•°ï¼šmsg - è¦å‘é€çš„ Msg å¯¹è±¡
 			inline void send(Msg&& msg) noexcept {
 				_Aio.set_msg(std::move(msg));
 				_State = WIS_SEND;
 				_Ctx.send(_Aio);
 			}
 
-			// Òì²½µÈ´ı
-			// ²ÎÊı£ºms - µÈ´ıÊ±¼ä£¨ºÁÃë£©
+			// å¼‚æ­¥ç­‰å¾…
+			// å‚æ•°ï¼šms - ç­‰å¾…æ—¶é—´ï¼ˆæ¯«ç§’ï¼‰
 			inline void wait(nng_duration ms) noexcept {
 				_State = WIS_WAIT;
 				_Aio.sleep(ms);
@@ -723,10 +740,10 @@ namespace nng
 		} WORK_ITEM, * PWORK_ITEM;
 
 	public:
-		// Æô¶¯²¢ĞĞ´¦Àí
-		// ²ÎÊı£ºaddr - ¼àÌıµØÖ·£¬parallel - ²¢ĞĞ¹¤×÷ÏîÊıÁ¿£¬flags - Æô¶¯±êÖ¾
-		// ·µ»Ø£º²Ù×÷½á¹û£¬0 ±íÊ¾³É¹¦
-		// Òì³££ºÈô´´½¨»òÆô¶¯Ê§°Ü£¬Å×³ö Exception
+		// å¯åŠ¨å¹¶è¡Œå¤„ç†
+		// å‚æ•°ï¼šaddr - ç›‘å¬åœ°å€ï¼Œparallel - å¹¶è¡Œå·¥ä½œé¡¹æ•°é‡ï¼Œflags - å¯åŠ¨æ ‡å¿—
+		// è¿”å›ï¼šæ“ä½œç»“æœï¼Œ0 è¡¨ç¤ºæˆåŠŸ
+		// å¼‚å¸¸ï¼šè‹¥åˆ›å»ºæˆ–å¯åŠ¨å¤±è´¥ï¼ŒæŠ›å‡º Exception
 		int start(std::string_view addr, size_t parallel = 1, int flags = 0) noexcept(false) {
 			int rv = _Create();
 			if (rv != NNG_OK) {
@@ -753,8 +770,8 @@ namespace nng
 		}
 
 	protected:
-		// »Øµ÷º¯Êı£º´¦Àí¹¤×÷ÏîµÄÒì²½²Ù×÷
-		// ²ÎÊı£ºarg - ¹¤×÷ÏîÖ¸Õë
+		// å›è°ƒå‡½æ•°ï¼šå¤„ç†å·¥ä½œé¡¹çš„å¼‚æ­¥æ“ä½œ
+		// å‚æ•°ï¼šarg - å·¥ä½œé¡¹æŒ‡é’ˆ
 		static void _Callback(void* arg) noexcept {
 			nng_err err;
 			auto _Work_item = static_cast<PWORK_ITEM>(arg);
@@ -802,42 +819,42 @@ namespace nng
 		}
 
 	private:
-		// Ğéº¯Êı£º´¦Àí¹¤×÷Ïî¹Ø±Õ
-		// ²ÎÊı£º_Work_item - ¹¤×÷ÏîÖ¸Õë
+		// è™šå‡½æ•°ï¼šå¤„ç†å·¥ä½œé¡¹å…³é—­
+		// å‚æ•°ï¼š_Work_item - å·¥ä½œé¡¹æŒ‡é’ˆ
 		virtual void _On_close(PWORK_ITEM _Work_item) {}
 
-		// Ğéº¯Êı£º´¦ÀíÔ­Ê¼ÏûÏ¢
-		// ²ÎÊı£ºmsg - ½ÓÊÕµÄ Msg ¶ÔÏó
-		// ·µ»Ø£ºtrue ±íÊ¾ÏûÏ¢ÒÑ´¦Àí£¬false ±íÊ¾¼ÌĞø´¦Àí
+		// è™šå‡½æ•°ï¼šå¤„ç†åŸå§‹æ¶ˆæ¯
+		// å‚æ•°ï¼šmsg - æ¥æ”¶çš„ Msg å¯¹è±¡
+		// è¿”å›ï¼štrue è¡¨ç¤ºæ¶ˆæ¯å·²å¤„ç†ï¼Œfalse è¡¨ç¤ºç»§ç»­å¤„ç†
 		virtual bool _On_raw_message(Msg& msg) override { return false; }
 
-		// Ğéº¯Êı£º´¦ÀíÔ­Ê¼ÏûÏ¢²¢ÉèÖÃµÈ´ıÊ±¼ä
-		// ²ÎÊı£ºmsg - ½ÓÊÕµÄ Msg ¶ÔÏó£¬_Wait_ms - µÈ´ıÊ±¼ä
-		// ·µ»Ø£ºtrue ±íÊ¾ÏûÏ¢ÒÑ´¦Àí£¬false ±íÊ¾¼ÌĞø´¦Àí
+		// è™šå‡½æ•°ï¼šå¤„ç†åŸå§‹æ¶ˆæ¯å¹¶è®¾ç½®ç­‰å¾…æ—¶é—´
+		// å‚æ•°ï¼šmsg - æ¥æ”¶çš„ Msg å¯¹è±¡ï¼Œ_Wait_ms - ç­‰å¾…æ—¶é—´
+		// è¿”å›ï¼štrue è¡¨ç¤ºæ¶ˆæ¯å·²å¤„ç†ï¼Œfalse è¡¨ç¤ºç»§ç»­å¤„ç†
 		virtual bool _On_raw_message(Msg& msg, nng_duration& _Wait_ms) {
 			return _On_raw_message(msg);
 		}
 
-		// Ğéº¯Êı£º´¦Àí±àÂëÏûÏ¢
-		// ²ÎÊı£ºcode - ÏûÏ¢´úÂë£¬msg - ½ÓÊÕµÄ Msg ¶ÔÏó
-		// ·µ»Ø£ºÏûÏ¢´¦Àí½á¹û
+		// è™šå‡½æ•°ï¼šå¤„ç†ç¼–ç æ¶ˆæ¯
+		// å‚æ•°ï¼šcode - æ¶ˆæ¯ä»£ç ï¼Œmsg - æ¥æ”¶çš„ Msg å¯¹è±¡
+		// è¿”å›ï¼šæ¶ˆæ¯å¤„ç†ç»“æœ
 		virtual Msg::_Ty_msg_result _On_message(Msg::_Ty_msg_code code, Msg& msg) override {
 			return {};
 		}
 
-		// Ğéº¯Êı£º´¦Àí±àÂëÏûÏ¢²¢ÉèÖÃµÈ´ıÊ±¼ä
-		// ²ÎÊı£ºcode - ÏûÏ¢´úÂë£¬msg - ½ÓÊÕµÄ Msg ¶ÔÏó£¬_Wait_ms - µÈ´ıÊ±¼ä
-		// ·µ»Ø£ºÏûÏ¢´¦Àí½á¹û
+		// è™šå‡½æ•°ï¼šå¤„ç†ç¼–ç æ¶ˆæ¯å¹¶è®¾ç½®ç­‰å¾…æ—¶é—´
+		// å‚æ•°ï¼šcode - æ¶ˆæ¯ä»£ç ï¼Œmsg - æ¥æ”¶çš„ Msg å¯¹è±¡ï¼Œ_Wait_ms - ç­‰å¾…æ—¶é—´
+		// è¿”å›ï¼šæ¶ˆæ¯å¤„ç†ç»“æœ
 		virtual Msg::_Ty_msg_result _On_message(Msg::_Ty_msg_code code, Msg& msg, nng_duration& _Wait_ms) {
 			return _On_message(code, msg);
 		}
 
-		// Ğéº¯Êı£º´¦ÀíµÈ´ı×´Ì¬
-		// ²ÎÊı£º_Wait_ms - µÈ´ıÊ±¼ä
+		// è™šå‡½æ•°ï¼šå¤„ç†ç­‰å¾…çŠ¶æ€
+		// å‚æ•°ï¼š_Wait_ms - ç­‰å¾…æ—¶é—´
 		virtual void _On_wait(nng_duration& _Wait_ms) {}
 
-		// ´¦ÀíµÈ´ı×´Ì¬µÄ¹¤×÷Ïî
-		// ²ÎÊı£º_Work_item - ¹¤×÷ÏîÖ¸Õë
+		// å¤„ç†ç­‰å¾…çŠ¶æ€çš„å·¥ä½œé¡¹
+		// å‚æ•°ï¼š_Work_item - å·¥ä½œé¡¹æŒ‡é’ˆ
 		virtual void _On_wait(PWORK_ITEM _Work_item) {
 			nng_duration _Wait_ms = -1;
 			_On_wait(_Wait_ms);
@@ -850,8 +867,8 @@ namespace nng
 			}
 		}
 
-		// ´¦Àí½ÓÊÕµ½µÄÏûÏ¢
-		// ²ÎÊı£º_Work_item - ¹¤×÷ÏîÖ¸Õë
+		// å¤„ç†æ¥æ”¶åˆ°çš„æ¶ˆæ¯
+		// å‚æ•°ï¼š_Work_item - å·¥ä½œé¡¹æŒ‡é’ˆ
 		void _On_message(PWORK_ITEM _Work_item) {
 			Msg& msg = _Work_item->_Msg;
 			nng_duration _Wait_ms = -1;
@@ -869,8 +886,8 @@ namespace nng
 			}
 		}
 
-		// Ğéº¯Êı£º´¦ÀíÒì³£
-		// ²ÎÊı£ºe - ´íÎóÂë
+		// è™šå‡½æ•°ï¼šå¤„ç†å¼‚å¸¸
+		// å‚æ•°ï¼še - é”™è¯¯ç 
 		virtual void _On_exception(nng_err e) {}
 
 	protected:
