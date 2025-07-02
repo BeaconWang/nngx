@@ -29,6 +29,10 @@ __________
 		-- Modify.Beacon.20250701
 			-> 1. Fix comment
 			-> 2. Add Msg::body_tail function to fetch data from the tail at a specified offset
+		-- Modify.Beacon.20250702
+			-> 1. Add SocketCore class to manage nng_socket
+			-> 2. Add SocketOpt class to manage nng_socket options
+			-> 3. Add Socket class to manage nng_socket and SocketOpt
 */
 
 /*
