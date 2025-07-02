@@ -1,6 +1,6 @@
 #pragma once
 
-#include "nngSocket.h"
+#include "nngSocketCore.h"
 #include <string>
 #include <string_view>
 
@@ -15,11 +15,11 @@ namespace nng
     // - HeaderOnly 模式，所有实现都在头文件中，便于集成和使用
     // - 使用 std::string_view 参数，提高性能，避免不必要的字符串拷贝
     // - 支持 TLS、TCP、IPC、WebSocket 等多种传输层的选项配置
-    class SocketOpt : public Socket
+    class SocketOpt : public SocketCore
     {
     public:
         // 继承 Socket 的构造函数
-        using Socket::Socket;
+        using SocketCore::SocketCore;
 
         // Socket 名称选项
         // 设置套接字名称，用于调试和日志记录
@@ -321,6 +321,7 @@ namespace nng
             return nng_socket_get_ms(_My_socket, NNG_OPT_RECONNMAXT, &time);
         }
 
+        /*
         // TLS 选项
         // 设置 TLS 配置
         // 参数：config - TLS 配置对象指针
@@ -335,6 +336,7 @@ namespace nng
         int get_tls_config(nng_tls_config** config) const noexcept {
             return nng_socket_get_ptr(_My_socket, NNG_OPT_TLS_CONFIG, (void**)config);
         }
+        */
 
         // 设置 TLS 认证模式
         // 参数：mode - 认证模式（NNG_TLS_AUTH_MODE_*）
@@ -391,12 +393,14 @@ namespace nng
             return rv;
         }
 
+        /*
         // 获取 TLS 对等方备用名称列表
         // 参数：names - 输出参数，存储对等方备用名称列表
         // 返回：操作结果，0 表示成功
         int get_tls_peer_alt_names(nng_list*& names) const noexcept {
             return nng_socket_get_list(_My_socket, NNG_OPT_TLS_PEER_ALT_NAMES, &names);
         }
+        */
 
         // TCP 选项
         // 设置 TCP nodelay 选项
