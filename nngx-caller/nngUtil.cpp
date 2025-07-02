@@ -180,13 +180,13 @@ int nng::util::initialize() noexcept {
         nng::util::_Pre_start_listen
     );
 
-    return nng::init();
+    return nng::initialize();
 }
 
 
 // 释放 NNG 库资源
 void nng::util::uninitialize() noexcept {
-    nng::fini();
+    nng::uninitialize();
 }
 
 std::string nng::util::_Pre_address(std::string_view _Address) noexcept {
