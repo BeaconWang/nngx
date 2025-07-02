@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include <list>
 #include <mutex>
@@ -50,12 +50,12 @@ namespace nng
 {
 	// 初始化 NNG 库
 	// 返回：操作结果，0 表示成功
-	inline int init() noexcept {
+	inline int initialize() noexcept {
 		return NNG_OK;
 	}
 
 	// 释放 NNG 库资源
-	inline void fini() noexcept {
+	inline void uninitialize() noexcept {
 		nng_fini();
 	}
 }
