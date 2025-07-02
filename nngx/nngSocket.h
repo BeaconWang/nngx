@@ -215,31 +215,6 @@ namespace nng
             return *this;
         }
 
-        // 设置发送超时
-        // 参数：timeout_ms - 发送超时时间（毫秒），0 表示无超时
-        // 返回：当前对象的引用（支持链式调用）
-        Socket& set_send_timeout(nng_duration timeout_ms) noexcept {
-            nng_socket_set_ms(_My_socket, NNG_OPT_SENDTIMEO, timeout_ms);
-            return *this;
-        }
-
-        // 设置接收超时
-        // 参数：timeout_ms - 接收超时时间（毫秒），0 表示无超时
-        // 返回：当前对象的引用（支持链式调用）
-        Socket& set_recv_timeout(nng_duration timeout_ms) noexcept {
-            nng_socket_set_ms(_My_socket, NNG_OPT_RECVTIMEO, timeout_ms);
-            return *this;
-        }
-
-        // 设置发送和接收超时
-        // 参数：send_timeout_ms - 发送超时时间（毫秒），recv_timeout_ms - 接收超时时间（毫秒）
-        // 返回：当前对象的引用（支持链式调用）
-        Socket& set_timeout(nng_duration send_timeout_ms, nng_duration recv_timeout_ms) noexcept {
-            nng_socket_set_ms(_My_socket, NNG_OPT_SENDTIMEO, send_timeout_ms);
-            nng_socket_set_ms(_My_socket, NNG_OPT_RECVTIMEO, recv_timeout_ms);
-            return *this;
-        }
-
         // 获取布尔型套接字选项
         // 参数：opt - 选项名称，val - 存储选项值的指针
         // 返回：操作结果，0 表示成功
@@ -266,20 +241,6 @@ namespace nng
         // 返回：操作结果，0 表示成功
         int get_ms(std::string_view opt, nng_duration& val) const noexcept {
             return nng_socket_get_ms(_My_socket, opt.data(), &val);
-        }
-
-        // 获取发送超时
-        // 参数：timeout_ms - 存储发送超时时间的指针
-        // 返回：操作结果，0 表示成功
-        int get_send_timeout(nng_duration& timeout_ms) const noexcept {
-            return nng_socket_get_ms(_My_socket, NNG_OPT_SENDTIMEO, &timeout_ms);
-        }
-
-        // 获取接收超时
-        // 参数：timeout_ms - 存储接收超时时间的指针
-        // 返回：操作结果，0 表示成功
-        int get_recv_timeout(nng_duration& timeout_ms) const noexcept {
-            return nng_socket_get_ms(_My_socket, NNG_OPT_RECVTIMEO, &timeout_ms);
         }
 
         // 获取协议 ID
