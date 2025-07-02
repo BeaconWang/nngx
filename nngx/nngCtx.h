@@ -9,18 +9,18 @@
 
 namespace nng
 {
-    // Ctx Àà£ºNNG ÉÏÏÂÎÄ£¨nng_ctx£©µÄ C++ RAII °ü×°Àà
-    // ÓÃÍ¾£ºÌá¹©¶Ô NNG ÉÏÏÂÎÄµÄ±ã½İ¹ÜÀí£¬Ö§³ÖÏûÏ¢µÄÒì²½ºÍÍ¬²½·¢ËÍ/½ÓÊÕ¡¢Ñ¡ÏîÅäÖÃÒÔ¼° SUB0 Ğ­ÒéµÄ¶©ÔÄ²Ù×÷
-    // ÌØĞÔ£º
-    // - Ê¹ÓÃ RAII ¹ÜÀí nng_ctx ×ÊÔ´£¬È·±£×Ô¶¯ÊÍ·Å
-    // - Ö§³ÖÒÆ¶¯¹¹ÔìºÍÒÆ¶¯¸³Öµ£¬½ûÓÃ¿½±´ÒÔ±£Ö¤×ÊÔ´¶ÀÕ¼
-    // - Ìá¹©Òì²½ºÍÍ¬²½µÄÏûÏ¢²Ù×÷¡¢ÉÏÏÂÎÄÑ¡ÏîÅäÖÃ
-    // - Òì³£°²È«£ºÉÏÏÂÎÄ´´½¨»ò½ÓÊÕÏûÏ¢Ê§°ÜÊ±Å×³ö Exception
+    // Ctx ç±»ï¼šNNG ä¸Šä¸‹æ–‡ï¼ˆnng_ctxï¼‰çš„ C++ RAII åŒ…è£…ç±»
+    // ç”¨é€”ï¼šæä¾›å¯¹ NNG ä¸Šä¸‹æ–‡çš„ä¾¿æ·ç®¡ç†ï¼Œæ”¯æŒæ¶ˆæ¯çš„å¼‚æ­¥å’ŒåŒæ­¥å‘é€/æ¥æ”¶ã€é€‰é¡¹é…ç½®ä»¥åŠ SUB0 åè®®çš„è®¢é˜…æ“ä½œ
+    // ç‰¹æ€§ï¼š
+    // - ä½¿ç”¨ RAII ç®¡ç† nng_ctx èµ„æºï¼Œç¡®ä¿è‡ªåŠ¨é‡Šæ”¾
+    // - æ”¯æŒç§»åŠ¨æ„é€ å’Œç§»åŠ¨èµ‹å€¼ï¼Œç¦ç”¨æ‹·è´ä»¥ä¿è¯èµ„æºç‹¬å 
+    // - æä¾›å¼‚æ­¥å’ŒåŒæ­¥çš„æ¶ˆæ¯æ“ä½œã€ä¸Šä¸‹æ–‡é€‰é¡¹é…ç½®
+    // - å¼‚å¸¸å®‰å…¨ï¼šä¸Šä¸‹æ–‡åˆ›å»ºæˆ–æ¥æ”¶æ¶ˆæ¯å¤±è´¥æ—¶æŠ›å‡º Exception
     class Ctx {
     public:
-        // ¹¹Ôìº¯Êı£ºÎªÖ¸¶¨Ì×½Ó×Ö´´½¨ÉÏÏÂÎÄ
-        // ²ÎÊı£ºsocket - NNG Ì×½Ó×Ö
-        // Òì³££ºÈô´´½¨Ê§°Ü£¬Å×³ö Exception
+        // æ„é€ å‡½æ•°ï¼šä¸ºæŒ‡å®šå¥—æ¥å­—åˆ›å»ºä¸Šä¸‹æ–‡
+        // å‚æ•°ï¼šsocket - NNG å¥—æ¥å­—
+        // å¼‚å¸¸ï¼šè‹¥åˆ›å»ºå¤±è´¥ï¼ŒæŠ›å‡º Exception
         explicit Ctx(nng_socket socket) noexcept(false) {
             int rv = nng_ctx_open(&_My_ctx, socket);
             if (rv != NNG_OK) {
@@ -28,21 +28,21 @@ namespace nng
             }
         }
 
-        // ½ûÓÃ¿½±´¹¹Ôìº¯Êı
+        // ç¦ç”¨æ‹·è´æ„é€ å‡½æ•°
         Ctx(const Ctx&) = delete;
 
-        // ½ûÓÃ¿½±´¸³ÖµÔËËã·û
+        // ç¦ç”¨æ‹·è´èµ‹å€¼è¿ç®—ç¬¦
         Ctx& operator=(const Ctx&) = delete;
 
-        // ÒÆ¶¯¹¹Ôìº¯Êı£º×ªÒÆÉÏÏÂÎÄËùÓĞÈ¨
-        // ²ÎÊı£ºother - Ô´ Ctx ¶ÔÏó
+        // ç§»åŠ¨æ„é€ å‡½æ•°ï¼šè½¬ç§»ä¸Šä¸‹æ–‡æ‰€æœ‰æƒ
+        // å‚æ•°ï¼šother - æº Ctx å¯¹è±¡
         Ctx(Ctx&& other) noexcept : _My_ctx(other._My_ctx) {
             other._My_ctx = NNG_CTX_INITIALIZER;
         }
 
-        // ÒÆ¶¯¸³ÖµÔËËã·û£º×ªÒÆÉÏÏÂÎÄËùÓĞÈ¨
-        // ²ÎÊı£ºother - Ô´ Ctx ¶ÔÏó
-        // ·µ»Ø£ºµ±Ç°¶ÔÏóµÄÒıÓÃ
+        // ç§»åŠ¨èµ‹å€¼è¿ç®—ç¬¦ï¼šè½¬ç§»ä¸Šä¸‹æ–‡æ‰€æœ‰æƒ
+        // å‚æ•°ï¼šother - æº Ctx å¯¹è±¡
+        // è¿”å›ï¼šå½“å‰å¯¹è±¡çš„å¼•ç”¨
         Ctx& operator=(Ctx&& other) noexcept {
             if (this != &other) {
                 if (_My_ctx.id != 0) {
@@ -54,29 +54,29 @@ namespace nng
             return *this;
         }
 
-        // Îö¹¹º¯Êı£ºÊÍ·ÅÉÏÏÂÎÄ×ÊÔ´
+        // ææ„å‡½æ•°ï¼šé‡Šæ”¾ä¸Šä¸‹æ–‡èµ„æº
         ~Ctx() noexcept {
             if (_My_ctx.id != 0) {
                 nng_ctx_close(_My_ctx);
             }
         }
 
-        // »ñÈ¡ÉÏÏÂÎÄ ID
-        // ·µ»Ø£ºÉÏÏÂÎÄµÄ ID
+        // è·å–ä¸Šä¸‹æ–‡ ID
+        // è¿”å›ï¼šä¸Šä¸‹æ–‡çš„ ID
         int id() const noexcept {
             return nng_ctx_id(_My_ctx);
         }
 
-        // Òì²½½ÓÊÕÏûÏ¢
-        // ²ÎÊı£ºaio - Òì²½ I/O ¶ÔÏó
+        // å¼‚æ­¥æ¥æ”¶æ¶ˆæ¯
+        // å‚æ•°ï¼šaio - å¼‚æ­¥ I/O å¯¹è±¡
         void recv(nng_aio* aio) const noexcept {
             nng_ctx_recv(_My_ctx, aio);
         }
 
-        // Í¬²½½ÓÊÕÏûÏ¢
-        // ²ÎÊı£ºflags - ½ÓÊÕ±êÖ¾£¬Ä¬ÈÏÎª 0
-        // ·µ»Ø£º½ÓÊÕµ½µÄ Msg ¶ÔÏó
-        // Òì³££ºÈô½ÓÊÕÊ§°Ü£¬Å×³ö Exception
+        // åŒæ­¥æ¥æ”¶æ¶ˆæ¯
+        // å‚æ•°ï¼šflags - æ¥æ”¶æ ‡å¿—ï¼Œé»˜è®¤ä¸º 0
+        // è¿”å›ï¼šæ¥æ”¶åˆ°çš„ Msg å¯¹è±¡
+        // å¼‚å¸¸ï¼šè‹¥æ¥æ”¶å¤±è´¥ï¼ŒæŠ›å‡º Exception
         Msg recv_msg(int flags = 0) const noexcept(false) {
             nng_msg* m;
             int rv = nng_ctx_recvmsg(_My_ctx, &m, flags);
@@ -86,36 +86,36 @@ namespace nng
             return Msg(m);
         }
 
-        // Òì²½·¢ËÍÏûÏ¢
-        // ²ÎÊı£ºaio - Òì²½ I/O ¶ÔÏó
+        // å¼‚æ­¥å‘é€æ¶ˆæ¯
+        // å‚æ•°ï¼šaio - å¼‚æ­¥ I/O å¯¹è±¡
         void send(nng_aio* aio) const noexcept {
             nng_ctx_send(_My_ctx, aio);
         }
 
-        // Òì²½·¢ËÍÏûÏ¢£¨Ê¹ÓÃ Aio ¶ÔÏó£©
-        // ²ÎÊı£ºaio - Aio ¶ÔÏó
+        // å¼‚æ­¥å‘é€æ¶ˆæ¯ï¼ˆä½¿ç”¨ Aio å¯¹è±¡ï¼‰
+        // å‚æ•°ï¼šaio - Aio å¯¹è±¡
         void send(const Aio& aio) const noexcept {
             nng_ctx_send(_My_ctx, aio);
         }
 
-        // Í¬²½·¢ËÍÏûÏ¢
-        // ²ÎÊı£ºmsg - Òª·¢ËÍµÄ nng_msg Ö¸Õë
-        // ·µ»Ø£º²Ù×÷½á¹û£¬0 ±íÊ¾³É¹¦
+        // åŒæ­¥å‘é€æ¶ˆæ¯
+        // å‚æ•°ï¼šmsg - è¦å‘é€çš„ nng_msg æŒ‡é’ˆ
+        // è¿”å›ï¼šæ“ä½œç»“æœï¼Œ0 è¡¨ç¤ºæˆåŠŸ
         int send(nng_msg* msg) const noexcept {
             return nng_ctx_sendmsg(_My_ctx, msg, 0);
         }
 
-        // Í¬²½·Ç×èÈû·¢ËÍÏûÏ¢
-        // ²ÎÊı£ºmsg - Òª·¢ËÍµÄ nng_msg Ö¸Õë
-        // ·µ»Ø£º²Ù×÷½á¹û£¬0 ±íÊ¾³É¹¦
+        // åŒæ­¥éé˜»å¡å‘é€æ¶ˆæ¯
+        // å‚æ•°ï¼šmsg - è¦å‘é€çš„ nng_msg æŒ‡é’ˆ
+        // è¿”å›ï¼šæ“ä½œç»“æœï¼Œ0 è¡¨ç¤ºæˆåŠŸ
         int send_nonblock(nng_msg* msg) const noexcept {
             return nng_ctx_sendmsg(_My_ctx, msg, NNG_FLAG_NONBLOCK);
         }
 
-        // Í¬²½·¢ËÍÏûÏ¢£¨Í¨¹ıÒÆ¶¯ Msg ¶ÔÏó£©
-        // ²ÎÊı£ºmsg - Òª·¢ËÍµÄ Msg ¶ÔÏó
-        // ·µ»Ø£º²Ù×÷½á¹û£¬0 ±íÊ¾³É¹¦
-        // ×¢Òâ£ºÈô·¢ËÍ³É¹¦£¬msg µÄ×ÊÔ´»á±»ÊÍ·Å
+        // åŒæ­¥å‘é€æ¶ˆæ¯ï¼ˆé€šè¿‡ç§»åŠ¨ Msg å¯¹è±¡ï¼‰
+        // å‚æ•°ï¼šmsg - è¦å‘é€çš„ Msg å¯¹è±¡
+        // è¿”å›ï¼šæ“ä½œç»“æœï¼Œ0 è¡¨ç¤ºæˆåŠŸ
+        // æ³¨æ„ï¼šè‹¥å‘é€æˆåŠŸï¼Œmsg çš„èµ„æºä¼šè¢«é‡Šæ”¾
         int send(Msg&& msg) const noexcept {
             int rv = nng_ctx_sendmsg(_My_ctx, msg, 0);
             if (rv == NNG_OK) {
@@ -124,79 +124,79 @@ namespace nng
             return rv;
         }
 
-        // »ñÈ¡²¼¶ûĞÍÉÏÏÂÎÄÑ¡Ïî
-        // ²ÎÊı£ºname - Ñ¡ÏîÃû³Æ£¬value - ´æ´¢Ñ¡ÏîÖµµÄÖ¸Õë
-        // ·µ»Ø£º²Ù×÷½á¹û£¬0 ±íÊ¾³É¹¦
+        // è·å–å¸ƒå°”å‹ä¸Šä¸‹æ–‡é€‰é¡¹
+        // å‚æ•°ï¼šname - é€‰é¡¹åç§°ï¼Œvalue - å­˜å‚¨é€‰é¡¹å€¼çš„æŒ‡é’ˆ
+        // è¿”å›ï¼šæ“ä½œç»“æœï¼Œ0 è¡¨ç¤ºæˆåŠŸ
         int get_bool(std::string_view name, bool* value) const noexcept {
             return nng_ctx_get_bool(_My_ctx, name.data(), value);
         }
 
-        // »ñÈ¡ÕûĞÍÉÏÏÂÎÄÑ¡Ïî
-        // ²ÎÊı£ºname - Ñ¡ÏîÃû³Æ£¬value - ´æ´¢Ñ¡ÏîÖµµÄÖ¸Õë
-        // ·µ»Ø£º²Ù×÷½á¹û£¬0 ±íÊ¾³É¹¦
+        // è·å–æ•´å‹ä¸Šä¸‹æ–‡é€‰é¡¹
+        // å‚æ•°ï¼šname - é€‰é¡¹åç§°ï¼Œvalue - å­˜å‚¨é€‰é¡¹å€¼çš„æŒ‡é’ˆ
+        // è¿”å›ï¼šæ“ä½œç»“æœï¼Œ0 è¡¨ç¤ºæˆåŠŸ
         int get_int(std::string_view name, int* value) const noexcept {
             return nng_ctx_get_int(_My_ctx, name.data(), value);
         }
 
-        // »ñÈ¡´óĞ¡ĞÍÉÏÏÂÎÄÑ¡Ïî
-        // ²ÎÊı£ºname - Ñ¡ÏîÃû³Æ£¬value - ´æ´¢Ñ¡ÏîÖµµÄÖ¸Õë
-        // ·µ»Ø£º²Ù×÷½á¹û£¬0 ±íÊ¾³É¹¦
+        // è·å–å¤§å°å‹ä¸Šä¸‹æ–‡é€‰é¡¹
+        // å‚æ•°ï¼šname - é€‰é¡¹åç§°ï¼Œvalue - å­˜å‚¨é€‰é¡¹å€¼çš„æŒ‡é’ˆ
+        // è¿”å›ï¼šæ“ä½œç»“æœï¼Œ0 è¡¨ç¤ºæˆåŠŸ
         int get_size(std::string_view name, size_t* value) const noexcept {
             return nng_ctx_get_size(_My_ctx, name.data(), value);
         }
 
-        // »ñÈ¡Ê±¼äĞÍÉÏÏÂÎÄÑ¡Ïî
-        // ²ÎÊı£ºname - Ñ¡ÏîÃû³Æ£¬value - ´æ´¢Ñ¡ÏîÖµµÄÖ¸Õë
-        // ·µ»Ø£º²Ù×÷½á¹û£¬0 ±íÊ¾³É¹¦
+        // è·å–æ—¶é—´å‹ä¸Šä¸‹æ–‡é€‰é¡¹
+        // å‚æ•°ï¼šname - é€‰é¡¹åç§°ï¼Œvalue - å­˜å‚¨é€‰é¡¹å€¼çš„æŒ‡é’ˆ
+        // è¿”å›ï¼šæ“ä½œç»“æœï¼Œ0 è¡¨ç¤ºæˆåŠŸ
         int get_ms(std::string_view name, nng_duration* value) const noexcept {
             return nng_ctx_get_ms(_My_ctx, name.data(), value);
         }
 
-        // ÉèÖÃÉÏÏÂÎÄÑ¡Ïî
-        // ²ÎÊı£ºname - Ñ¡ÏîÃû³Æ£¬data - Ñ¡ÏîÊı¾İ£¬size - Êı¾İ´óĞ¡
-        // ·µ»Ø£º²Ù×÷½á¹û£¬0 ±íÊ¾³É¹¦
+        // è®¾ç½®ä¸Šä¸‹æ–‡é€‰é¡¹
+        // å‚æ•°ï¼šname - é€‰é¡¹åç§°ï¼Œdata - é€‰é¡¹æ•°æ®ï¼Œsize - æ•°æ®å¤§å°
+        // è¿”å›ï¼šæ“ä½œç»“æœï¼Œ0 è¡¨ç¤ºæˆåŠŸ
         int set(std::string_view name, const void* data, size_t size) const noexcept {
             return nng_ctx_set(_My_ctx, name.data(), data, size);
         }
 
-        // ÉèÖÃ²¼¶ûĞÍÉÏÏÂÎÄÑ¡Ïî
-        // ²ÎÊı£ºname - Ñ¡ÏîÃû³Æ£¬value - Ñ¡ÏîÖµ
-        // ·µ»Ø£º²Ù×÷½á¹û£¬0 ±íÊ¾³É¹¦
+        // è®¾ç½®å¸ƒå°”å‹ä¸Šä¸‹æ–‡é€‰é¡¹
+        // å‚æ•°ï¼šname - é€‰é¡¹åç§°ï¼Œvalue - é€‰é¡¹å€¼
+        // è¿”å›ï¼šæ“ä½œç»“æœï¼Œ0 è¡¨ç¤ºæˆåŠŸ
         int set_bool(std::string_view name, bool value) const noexcept {
             return nng_ctx_set_bool(_My_ctx, name.data(), value);
         }
 
-        // ÉèÖÃÕûĞÍÉÏÏÂÎÄÑ¡Ïî
-        // ²ÎÊı£ºname - Ñ¡ÏîÃû³Æ£¬value - Ñ¡ÏîÖµ
-        // ·µ»Ø£º²Ù×÷½á¹û£¬0 ±íÊ¾³É¹¦
+        // è®¾ç½®æ•´å‹ä¸Šä¸‹æ–‡é€‰é¡¹
+        // å‚æ•°ï¼šname - é€‰é¡¹åç§°ï¼Œvalue - é€‰é¡¹å€¼
+        // è¿”å›ï¼šæ“ä½œç»“æœï¼Œ0 è¡¨ç¤ºæˆåŠŸ
         int set_int(std::string_view name, int value) const noexcept {
             return nng_ctx_set_int(_My_ctx, name.data(), value);
         }
 
-        // ÉèÖÃ´óĞ¡ĞÍÉÏÏÂÎÄÑ¡Ïî
-        // ²ÎÊı£ºname - Ñ¡ÏîÃû³Æ£¬value - Ñ¡ÏîÖµ
-        // ·µ»Ø£º²Ù×÷½á¹û£¬0 ±íÊ¾³É¹¦
+        // è®¾ç½®å¤§å°å‹ä¸Šä¸‹æ–‡é€‰é¡¹
+        // å‚æ•°ï¼šname - é€‰é¡¹åç§°ï¼Œvalue - é€‰é¡¹å€¼
+        // è¿”å›ï¼šæ“ä½œç»“æœï¼Œ0 è¡¨ç¤ºæˆåŠŸ
         int set_size(std::string_view name, size_t value) const noexcept {
             return nng_ctx_set_size(_My_ctx, name.data(), value);
         }
 
-        // ÉèÖÃÊ±¼äĞÍÉÏÏÂÎÄÑ¡Ïî
-        // ²ÎÊı£ºname - Ñ¡ÏîÃû³Æ£¬value - Ñ¡ÏîÖµ
-        // ·µ»Ø£º²Ù×÷½á¹û£¬0 ±íÊ¾³É¹¦
+        // è®¾ç½®æ—¶é—´å‹ä¸Šä¸‹æ–‡é€‰é¡¹
+        // å‚æ•°ï¼šname - é€‰é¡¹åç§°ï¼Œvalue - é€‰é¡¹å€¼
+        // è¿”å›ï¼šæ“ä½œç»“æœï¼Œ0 è¡¨ç¤ºæˆåŠŸ
         int set_ms(std::string_view name, nng_duration value) const noexcept {
             return nng_ctx_set_ms(_My_ctx, name.data(), value);
         }
 
-        // SUB0 Ğ­Òé£º¶©ÔÄÖ¸¶¨Ö÷Ìâ
-        // ²ÎÊı£ºbuf - Ö÷ÌâÊı¾İ£¬sz - Êı¾İ´óĞ¡
-        // ·µ»Ø£º²Ù×÷½á¹û£¬0 ±íÊ¾³É¹¦
+        // SUB0 åè®®ï¼šè®¢é˜…æŒ‡å®šä¸»é¢˜
+        // å‚æ•°ï¼šbuf - ä¸»é¢˜æ•°æ®ï¼Œsz - æ•°æ®å¤§å°
+        // è¿”å›ï¼šæ“ä½œç»“æœï¼Œ0 è¡¨ç¤ºæˆåŠŸ
         int subscribe(const void* buf, size_t sz) const noexcept {
             return nng_sub0_ctx_subscribe(_My_ctx, buf, sz);
         }
 
-        // SUB0 Ğ­Òé£ºÈ¡Ïû¶©ÔÄÖ¸¶¨Ö÷Ìâ
-        // ²ÎÊı£ºbuf - Ö÷ÌâÊı¾İ£¬sz - Êı¾İ´óĞ¡
-        // ·µ»Ø£º²Ù×÷½á¹û£¬0 ±íÊ¾³É¹¦
+        // SUB0 åè®®ï¼šå–æ¶ˆè®¢é˜…æŒ‡å®šä¸»é¢˜
+        // å‚æ•°ï¼šbuf - ä¸»é¢˜æ•°æ®ï¼Œsz - æ•°æ®å¤§å°
+        // è¿”å›ï¼šæ“ä½œç»“æœï¼Œ0 è¡¨ç¤ºæˆåŠŸ
         int unsubscribe(const void* buf, size_t sz) const noexcept {
             return nng_sub0_ctx_unsubscribe(_My_ctx, buf, sz);
         }

@@ -10,13 +10,13 @@
 
 namespace nng
 {
-    // Peer Àà£ºNNG Ì×½Ó×ÖµÄÄ£°åÀà£¬¼Ì³Ğ Socket£¬Ö§³Ö Listener »ò Dialer Á¬½ÓÆ÷
-    // ÓÃÍ¾£ºÌá¹©Ì×½Ó×ÖµÄ´´½¨¡¢Á¬½ÓÆô¶¯ºÍÁ¬½ÓÆ÷¹ÜÀí£¬Ö§³Ö Listener »ò Dialer ÀàĞÍµÄÁ¬½Ó
-    // ÌØĞÔ£º
-    // - Ê¹ÓÃ RAII Í¨¹ı std::unique_ptr ¹ÜÀíÁ¬½ÓÆ÷×ÊÔ´
-    // - Ö§³ÖÄ£°å»¯Á¬½ÓÆ÷ÀàĞÍ£¨Listener »ò Dialer£©£¬Í¨¹ı static_assert ÏŞÖÆ
-    // - Ìá¹©Ğéº¯Êı½Ó¿ÚÒÔÖ§³Ö×ÓÀàÀ©Õ¹
-    // - Òì³£°²È«£ºÁ¬½ÓÆ÷´´½¨Ê§°ÜÊ±¿ÉÄÜÅ×³ö Exception
+    // Peer ç±»ï¼šNNG å¥—æ¥å­—çš„æ¨¡æ¿ç±»ï¼Œç»§æ‰¿ Socketï¼Œæ”¯æŒ Listener æˆ– Dialer è¿æ¥å™¨
+    // ç”¨é€”ï¼šæä¾›å¥—æ¥å­—çš„åˆ›å»ºã€è¿æ¥å¯åŠ¨å’Œè¿æ¥å™¨ç®¡ç†ï¼Œæ”¯æŒ Listener æˆ– Dialer ç±»å‹çš„è¿æ¥
+    // ç‰¹æ€§ï¼š
+    // - ä½¿ç”¨ RAII é€šè¿‡ std::unique_ptr ç®¡ç†è¿æ¥å™¨èµ„æº
+    // - æ”¯æŒæ¨¡æ¿åŒ–è¿æ¥å™¨ç±»å‹ï¼ˆListener æˆ– Dialerï¼‰ï¼Œé€šè¿‡ static_assert é™åˆ¶
+    // - æä¾›è™šå‡½æ•°æ¥å£ä»¥æ”¯æŒå­ç±»æ‰©å±•
+    // - å¼‚å¸¸å®‰å…¨ï¼šè¿æ¥å™¨åˆ›å»ºå¤±è´¥æ—¶å¯èƒ½æŠ›å‡º Exception
     template<class _Connector_t = Listener>
     class Peer : virtual public Socket
     {
@@ -25,15 +25,15 @@ namespace nng
             "_Connector_t must be either Listener or Dialer"
             );
 
-        // ´´½¨Ì×½Ó×ÖµÄĞéº¯Êı£¬ÓÉ×ÓÀàÊµÏÖ
-        // ·µ»Ø£º²Ù×÷½á¹û£¬0 ±íÊ¾³É¹¦
+        // åˆ›å»ºå¥—æ¥å­—çš„è™šå‡½æ•°ï¼Œç”±å­ç±»å®ç°
+        // è¿”å›ï¼šæ“ä½œç»“æœï¼Œ0 è¡¨ç¤ºæˆåŠŸ
         virtual int _Create() noexcept = 0;
 
     public:
-        // Æô¶¯Á¬½Ó
-        // ²ÎÊı£ºaddr - Á¬½ÓµØÖ·£¬flags - Æô¶¯±êÖ¾£¬Ä¬ÈÏÎª 0
-        // ·µ»Ø£º²Ù×÷½á¹û£¬0 ±íÊ¾³É¹¦
-        // Òì³££ºÈô´´½¨Ì×½Ó×Ö»òÁ¬½ÓÆ÷Ê§°Ü£¬Å×³ö Exception
+        // å¯åŠ¨è¿æ¥
+        // å‚æ•°ï¼šaddr - è¿æ¥åœ°å€ï¼Œflags - å¯åŠ¨æ ‡å¿—ï¼Œé»˜è®¤ä¸º 0
+        // è¿”å›ï¼šæ“ä½œç»“æœï¼Œ0 è¡¨ç¤ºæˆåŠŸ
+        // å¼‚å¸¸ï¼šè‹¥åˆ›å»ºå¥—æ¥å­—æˆ–è¿æ¥å™¨å¤±è´¥ï¼ŒæŠ›å‡º Exception
         int start(std::string_view addr, int flags = 0) noexcept(false) {
             int rv = _Create();
             if (rv != NNG_OK) {
@@ -44,8 +44,8 @@ namespace nng
             return _My_connector->start(flags);
         }
 
-        // »ñÈ¡Á¬½ÓÆ÷Ö¸Õë
-        // ·µ»Ø£ºÖ¸ÏòÁ¬½ÓÆ÷µÄÔ­Ê¼Ö¸Õë
+        // è·å–è¿æ¥å™¨æŒ‡é’ˆ
+        // è¿”å›ï¼šæŒ‡å‘è¿æ¥å™¨çš„åŸå§‹æŒ‡é’ˆ
         _Connector_t* get_connector() const noexcept { return _My_connector.get(); }
 
     protected:

@@ -167,7 +167,7 @@ public:
                 futListening.wait();
                 assert(dialerPair.start(m_szAddr) == NNG_OK);
 
-                // ½ÓÊÕÏß³Ì
+                // æ¥æ”¶çº¿ç¨‹
                 std::thread thDispatch(
                     [&dialerPair]
                     {
@@ -175,7 +175,7 @@ public:
                     }
                 );
 
-                // ·¢ËÍÏß³Ì
+                // å‘é€çº¿ç¨‹
                 std::thread thSender(
                     [&dialerPair]
                     {
@@ -190,7 +190,7 @@ public:
                     }
                 );
 
-                // µÈ´ı·şÎñ¶ËÏß³ÌÍË³ö
+                // ç­‰å¾…æœåŠ¡ç«¯çº¿ç¨‹é€€å‡º
                 assert(thListenerPair.joinable());
                 thListenerPair.join();
 
@@ -256,7 +256,7 @@ public:
         Request request;
         assert(request.start(m_szAddr) == NNG_OK);
 
-        // Í¬²½·¢ËÍÇëÇó
+        // åŒæ­¥å‘é€è¯·æ±‚
         for (size_t i(0); i < 3; ++i) {
             Msg m(0);
             m.append_u32(0x12345678);
@@ -351,7 +351,7 @@ public:
 
                     subscriber.socket_subscribe();
 
-                    // Ö»ÒªÁ¬½Ó³É¹¦£¬¾Í»áÈ·±£ÄÜ½ÓÊÕµ½
+                    // åªè¦è¿æ¥æˆåŠŸï¼Œå°±ä¼šç¡®ä¿èƒ½æ¥æ”¶åˆ°
                     std::this_thread::sleep_for(std::chrono::milliseconds(200));
 
                     subscriber.dispatch();
@@ -506,8 +506,8 @@ public:
         Msg m(0);
         m.append_string("BusString");
         buses[idx].second.send(MSG_CODE0, std::move(m));
-        buses[idx].second.send(MSG_QUIT); // ÆäËü·½ÍË³ö
-        buses[idx].second.close(); // ·¢ËÍ·½ÍË³ö
+        buses[idx].second.send(MSG_QUIT); // å…¶å®ƒæ–¹é€€å‡º
+        buses[idx].second.close(); // å‘é€æ–¹é€€å‡º
 
         for (auto& bus : buses) {
             assert(bus.first.joinable());
@@ -592,7 +592,7 @@ public:
         Request request;
         assert(request.start(m_szAddr) == NNG_OK);
 
-        // Í¬²½·¢ËÍÇëÇó
+        // åŒæ­¥å‘é€è¯·æ±‚
         for (size_t i(0); i < 3; ++i) {
             Msg m(0);
             m.append_u32(0x12345678);
@@ -728,8 +728,8 @@ public:
         Msg m(0);
         m.append_string("BusString");
         buses[idx].send(MSG_CODE0, std::move(m));
-        buses[idx].send(MSG_QUIT); // ÆäËü·½ÍË³ö
-        buses[idx].close(); // ·¢ËÍ·½ÍË³ö
+        buses[idx].send(MSG_QUIT); // å…¶å®ƒæ–¹é€€å‡º
+        buses[idx].close(); // å‘é€æ–¹é€€å‡º
 
         for (auto& bus : buses) {
             assert(bus.joinable());
@@ -772,7 +772,7 @@ public:
         Request request;
         assert(request.start(m_szAddr) == NNG_OK);
 
-        // Í¬²½·¢ËÍÇëÇó
+        // åŒæ­¥å‘é€è¯·æ±‚
         for (size_t i(0); i < 3; ++i) {
             Msg m(0);
             m.append_u32(MSG_CODE0);
@@ -782,7 +782,7 @@ public:
             assert(m.len() == 0);
         }
 
-        // Òì²½·¢ËÍÇëÇó
+        // å¼‚æ­¥å‘é€è¯·æ±‚
         for (size_t i(0); i < 3; ++i) {
             Msg m(0);
             m.append_u32(MSG_CODE0);
@@ -829,7 +829,7 @@ public:
             virtual Msg::_Ty_msg_result _On_message(Msg::_Ty_msg_code code, Msg& msg) override {
                 if (code == MSG_QUIT) {
                     this->send(MSG_QUIT);
-                    // Í¬²½£¬ÉÏÃæ·¢ËÍÍêÁËÔÙÍË³ö
+                    // åŒæ­¥ï¼Œä¸Šé¢å‘é€å®Œäº†å†é€€å‡º
                     this->close();
                     return {};
                 }
@@ -987,7 +987,7 @@ public:
             pusher.async_send(MSG_CODE_ASYNC, std::move(m));
         }
 
-        // µÈ´ıÒì²½Êı¾İ·¢ËÍÍê³É¡£
+        // ç­‰å¾…å¼‚æ­¥æ•°æ®å‘é€å®Œæˆã€‚
         std::this_thread::sleep_for(std::chrono::seconds(10));
         pusher.close();
         puller.stop_dispatch();

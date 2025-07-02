@@ -1,4 +1,4 @@
-﻿
+
 # Add source to this project's executable.
 add_executable (nngx-caller "main.cpp" "nngUtil.cpp")
 

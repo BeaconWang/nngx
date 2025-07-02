@@ -5,19 +5,19 @@
 
 namespace nng
 {
-    // Dialer Àà£ºNNG ²¦ºÅÆ÷£¨nng_dialer£©µÄ C++ RAII °ü×°Àà
-    // ÓÃÍ¾£ºÌá¹©¶Ô NNG ²¦ºÅÆ÷µÄ±ã½İ¹ÜÀí£¬Ö§³Ö²¦ºÅÆ÷µÄ´´½¨¡¢Æô¶¯¡¢¹Ø±Õ¡¢Ñ¡ÏîÅäÖÃÒÔ¼° TLS ºÍ URL ÉèÖÃ/»ñÈ¡
-    // ÌØĞÔ£º
-    // - Ê¹ÓÃ RAII ¹ÜÀí nng_dialer ×ÊÔ´£¬È·±£×Ô¶¯ÊÍ·Å
-    // - Ö§³ÖÒÆ¶¯¹¹ÔìºÍÒÆ¶¯¸³Öµ£¬½ûÓÃ¿½±´ÒÔ±£Ö¤×ÊÔ´¶ÀÕ¼
-    // - Ìá¹©Á´Ê½µ÷ÓÃ½Ó¿ÚÒÔÉèÖÃÑ¡Ïî
-    // - Òì³£°²È«£º²¦ºÅÆ÷´´½¨Ê§°ÜÊ±Å×³ö Exception
+    // Dialer ç±»ï¼šNNG æ‹¨å·å™¨ï¼ˆnng_dialerï¼‰çš„ C++ RAII åŒ…è£…ç±»
+    // ç”¨é€”ï¼šæä¾›å¯¹ NNG æ‹¨å·å™¨çš„ä¾¿æ·ç®¡ç†ï¼Œæ”¯æŒæ‹¨å·å™¨çš„åˆ›å»ºã€å¯åŠ¨ã€å…³é—­ã€é€‰é¡¹é…ç½®ä»¥åŠ TLS å’Œ URL è®¾ç½®/è·å–
+    // ç‰¹æ€§ï¼š
+    // - ä½¿ç”¨ RAII ç®¡ç† nng_dialer èµ„æºï¼Œç¡®ä¿è‡ªåŠ¨é‡Šæ”¾
+    // - æ”¯æŒç§»åŠ¨æ„é€ å’Œç§»åŠ¨èµ‹å€¼ï¼Œç¦ç”¨æ‹·è´ä»¥ä¿è¯èµ„æºç‹¬å 
+    // - æä¾›é“¾å¼è°ƒç”¨æ¥å£ä»¥è®¾ç½®é€‰é¡¹
+    // - å¼‚å¸¸å®‰å…¨ï¼šæ‹¨å·å™¨åˆ›å»ºå¤±è´¥æ—¶æŠ›å‡º Exception
     class Dialer
         : public Hooker<Dialer> {
     public:
-        // ¹¹Ôìº¯Êı£ºÎªÖ¸¶¨Ì×½Ó×ÖºÍµØÖ·´´½¨²¦ºÅÆ÷
-        // ²ÎÊı£ºsocket - NNG Ì×½Ó×Ö£¬addr - Á¬½ÓµØÖ·
-        // Òì³££ºÈô´´½¨Ê§°Ü£¬Å×³ö Exception
+        // æ„é€ å‡½æ•°ï¼šä¸ºæŒ‡å®šå¥—æ¥å­—å’Œåœ°å€åˆ›å»ºæ‹¨å·å™¨
+        // å‚æ•°ï¼šsocket - NNG å¥—æ¥å­—ï¼Œaddr - è¿æ¥åœ°å€
+        // å¼‚å¸¸ï¼šè‹¥åˆ›å»ºå¤±è´¥ï¼ŒæŠ›å‡º Exception
         Dialer(nng_socket socket, std::string_view addr) noexcept(false) {
             int rv = nng_dialer_create(&_My_dialer, socket, Hooker<Dialer>::_Pre_address(addr).c_str());
             if (rv != NNG_OK) {
@@ -25,20 +25,20 @@ namespace nng
             }
         }
 
-        // Îö¹¹º¯Êı£º¹Ø±Õ²¢ÊÍ·Å²¦ºÅÆ÷×ÊÔ´
+        // ææ„å‡½æ•°ï¼šå…³é—­å¹¶é‡Šæ”¾æ‹¨å·å™¨èµ„æº
         virtual ~Dialer() noexcept {
             close();
         }
 
-        // ÒÆ¶¯¹¹Ôìº¯Êı£º×ªÒÆ²¦ºÅÆ÷ËùÓĞÈ¨
-        // ²ÎÊı£ºother - Ô´ Dialer ¶ÔÏó
+        // ç§»åŠ¨æ„é€ å‡½æ•°ï¼šè½¬ç§»æ‹¨å·å™¨æ‰€æœ‰æƒ
+        // å‚æ•°ï¼šother - æº Dialer å¯¹è±¡
         Dialer(Dialer&& other) noexcept : _My_dialer(other._My_dialer) {
             other._My_dialer.id = 0;
         }
 
-        // ÒÆ¶¯¸³ÖµÔËËã·û£º×ªÒÆ²¦ºÅÆ÷ËùÓĞÈ¨
-        // ²ÎÊı£ºother - Ô´ Dialer ¶ÔÏó
-        // ·µ»Ø£ºµ±Ç°¶ÔÏóµÄÒıÓÃ
+        // ç§»åŠ¨èµ‹å€¼è¿ç®—ç¬¦ï¼šè½¬ç§»æ‹¨å·å™¨æ‰€æœ‰æƒ
+        // å‚æ•°ï¼šother - æº Dialer å¯¹è±¡
+        // è¿”å›ï¼šå½“å‰å¯¹è±¡çš„å¼•ç”¨
         Dialer& operator=(Dialer&& other) noexcept {
             if (this != &other) {
                 close();
@@ -48,21 +48,21 @@ namespace nng
             return *this;
         }
 
-        // ½ûÓÃ¿½±´¹¹Ôìº¯Êı
+        // ç¦ç”¨æ‹·è´æ„é€ å‡½æ•°
         Dialer(const Dialer&) = delete;
 
-        // ½ûÓÃ¿½±´¸³ÖµÔËËã·û
+        // ç¦ç”¨æ‹·è´èµ‹å€¼è¿ç®—ç¬¦
         Dialer& operator=(const Dialer&) = delete;
 
-        // Æô¶¯²¦ºÅÆ÷
-        // ²ÎÊı£ºflags - Æô¶¯±êÖ¾£¬Ä¬ÈÏÎª 0
-        // ·µ»Ø£º²Ù×÷½á¹û£¬0 ±íÊ¾³É¹¦
+        // å¯åŠ¨æ‹¨å·å™¨
+        // å‚æ•°ï¼šflags - å¯åŠ¨æ ‡å¿—ï¼Œé»˜è®¤ä¸º 0
+        // è¿”å›ï¼šæ“ä½œç»“æœï¼Œ0 è¡¨ç¤ºæˆåŠŸ
         int start(int flags = 0) noexcept {
             _Pre_start(*this);
             return nng_dialer_start(_My_dialer, flags);
         }
 
-        // ¹Ø±Õ²¦ºÅÆ÷
+        // å…³é—­æ‹¨å·å™¨
         void close() noexcept {
             if (valid()) {
                 nng_dialer_close(_My_dialer);
@@ -70,105 +70,105 @@ namespace nng
             }
         }
 
-        // ¼ì²é²¦ºÅÆ÷ÊÇ·ñÓĞĞ§
-        // ·µ»Ø£ºtrue ±íÊ¾ÓĞĞ§£¬false ±íÊ¾ÎŞĞ§
+        // æ£€æŸ¥æ‹¨å·å™¨æ˜¯å¦æœ‰æ•ˆ
+        // è¿”å›ï¼štrue è¡¨ç¤ºæœ‰æ•ˆï¼Œfalse è¡¨ç¤ºæ— æ•ˆ
         bool valid() const noexcept {
             return _My_dialer.id != 0;
         }
 
-        // »ñÈ¡²¦ºÅÆ÷ ID
-        // ·µ»Ø£º²¦ºÅÆ÷µÄ ID
+        // è·å–æ‹¨å·å™¨ ID
+        // è¿”å›ï¼šæ‹¨å·å™¨çš„ ID
         int id() const noexcept {
             return nng_dialer_id(_My_dialer);
         }
 
-        // ÉèÖÃ²¼¶ûĞÍ²¦ºÅÆ÷Ñ¡Ïî
-        // ²ÎÊı£ºopt - Ñ¡ÏîÃû³Æ£¬val - Ñ¡ÏîÖµ
-        // ·µ»Ø£ºµ±Ç°¶ÔÏóµÄÒıÓÃ£¨Ö§³ÖÁ´Ê½µ÷ÓÃ£©
+        // è®¾ç½®å¸ƒå°”å‹æ‹¨å·å™¨é€‰é¡¹
+        // å‚æ•°ï¼šopt - é€‰é¡¹åç§°ï¼Œval - é€‰é¡¹å€¼
+        // è¿”å›ï¼šå½“å‰å¯¹è±¡çš„å¼•ç”¨ï¼ˆæ”¯æŒé“¾å¼è°ƒç”¨ï¼‰
         Dialer& set_bool(std::string_view opt, bool val) noexcept {
             nng_dialer_set_bool(_My_dialer, opt.data(), val);
             return *this;
         }
 
-        // ÉèÖÃÕûĞÍ²¦ºÅÆ÷Ñ¡Ïî
-        // ²ÎÊı£ºopt - Ñ¡ÏîÃû³Æ£¬val - Ñ¡ÏîÖµ
-        // ·µ»Ø£ºµ±Ç°¶ÔÏóµÄÒıÓÃ£¨Ö§³ÖÁ´Ê½µ÷ÓÃ£©
+        // è®¾ç½®æ•´å‹æ‹¨å·å™¨é€‰é¡¹
+        // å‚æ•°ï¼šopt - é€‰é¡¹åç§°ï¼Œval - é€‰é¡¹å€¼
+        // è¿”å›ï¼šå½“å‰å¯¹è±¡çš„å¼•ç”¨ï¼ˆæ”¯æŒé“¾å¼è°ƒç”¨ï¼‰
         Dialer& set_int(std::string_view opt, int val) noexcept {
             nng_dialer_set_int(_My_dialer, opt.data(), val);
             return *this;
         }
 
-        // ÉèÖÃ´óĞ¡ĞÍ²¦ºÅÆ÷Ñ¡Ïî
-        // ²ÎÊı£ºopt - Ñ¡ÏîÃû³Æ£¬val - Ñ¡ÏîÖµ
-        // ·µ»Ø£ºµ±Ç°¶ÔÏóµÄÒıÓÃ£¨Ö§³ÖÁ´Ê½µ÷ÓÃ£©
+        // è®¾ç½®å¤§å°å‹æ‹¨å·å™¨é€‰é¡¹
+        // å‚æ•°ï¼šopt - é€‰é¡¹åç§°ï¼Œval - é€‰é¡¹å€¼
+        // è¿”å›ï¼šå½“å‰å¯¹è±¡çš„å¼•ç”¨ï¼ˆæ”¯æŒé“¾å¼è°ƒç”¨ï¼‰
         Dialer& set_size(std::string_view opt, size_t val) noexcept {
             nng_dialer_set_size(_My_dialer, opt.data(), val);
             return *this;
         }
 
-        // ÉèÖÃ 64 Î»ÎŞ·ûºÅÕûĞÍ²¦ºÅÆ÷Ñ¡Ïî
-        // ²ÎÊı£ºopt - Ñ¡ÏîÃû³Æ£¬val - Ñ¡ÏîÖµ
-        // ·µ»Ø£ºµ±Ç°¶ÔÏóµÄÒıÓÃ£¨Ö§³ÖÁ´Ê½µ÷ÓÃ£©
+        // è®¾ç½® 64 ä½æ— ç¬¦å·æ•´å‹æ‹¨å·å™¨é€‰é¡¹
+        // å‚æ•°ï¼šopt - é€‰é¡¹åç§°ï¼Œval - é€‰é¡¹å€¼
+        // è¿”å›ï¼šå½“å‰å¯¹è±¡çš„å¼•ç”¨ï¼ˆæ”¯æŒé“¾å¼è°ƒç”¨ï¼‰
         Dialer& set_uint64(std::string_view opt, uint64_t val) noexcept {
             nng_dialer_set_uint64(_My_dialer, opt.data(), val);
             return *this;
         }
 
-        // ÉèÖÃ×Ö·û´®ĞÍ²¦ºÅÆ÷Ñ¡Ïî
-        // ²ÎÊı£ºopt - Ñ¡ÏîÃû³Æ£¬val - Ñ¡ÏîÖµ
-        // ·µ»Ø£ºµ±Ç°¶ÔÏóµÄÒıÓÃ£¨Ö§³ÖÁ´Ê½µ÷ÓÃ£©
+        // è®¾ç½®å­—ç¬¦ä¸²å‹æ‹¨å·å™¨é€‰é¡¹
+        // å‚æ•°ï¼šopt - é€‰é¡¹åç§°ï¼Œval - é€‰é¡¹å€¼
+        // è¿”å›ï¼šå½“å‰å¯¹è±¡çš„å¼•ç”¨ï¼ˆæ”¯æŒé“¾å¼è°ƒç”¨ï¼‰
         Dialer& set_string(std::string_view opt, std::string_view val) noexcept {
             nng_dialer_set_string(_My_dialer, opt.data(), val.data());
             return *this;
         }
 
-        // ÉèÖÃÊ±¼äĞÍ²¦ºÅÆ÷Ñ¡Ïî
-        // ²ÎÊı£ºopt - Ñ¡ÏîÃû³Æ£¬val - Ñ¡ÏîÖµ£¨ºÁÃë£©
-        // ·µ»Ø£ºµ±Ç°¶ÔÏóµÄÒıÓÃ£¨Ö§³ÖÁ´Ê½µ÷ÓÃ£©
+        // è®¾ç½®æ—¶é—´å‹æ‹¨å·å™¨é€‰é¡¹
+        // å‚æ•°ï¼šopt - é€‰é¡¹åç§°ï¼Œval - é€‰é¡¹å€¼ï¼ˆæ¯«ç§’ï¼‰
+        // è¿”å›ï¼šå½“å‰å¯¹è±¡çš„å¼•ç”¨ï¼ˆæ”¯æŒé“¾å¼è°ƒç”¨ï¼‰
         Dialer& set_ms(std::string_view opt, nng_duration val) noexcept {
             nng_dialer_set_ms(_My_dialer, opt.data(), val);
             return *this;
         }
 
-        // ÉèÖÃµØÖ·ĞÍ²¦ºÅÆ÷Ñ¡Ïî
-        // ²ÎÊı£ºopt - Ñ¡ÏîÃû³Æ£¬val - µØÖ·Öµ
-        // ·µ»Ø£ºµ±Ç°¶ÔÏóµÄÒıÓÃ£¨Ö§³ÖÁ´Ê½µ÷ÓÃ£©
+        // è®¾ç½®åœ°å€å‹æ‹¨å·å™¨é€‰é¡¹
+        // å‚æ•°ï¼šopt - é€‰é¡¹åç§°ï¼Œval - åœ°å€å€¼
+        // è¿”å›ï¼šå½“å‰å¯¹è±¡çš„å¼•ç”¨ï¼ˆæ”¯æŒé“¾å¼è°ƒç”¨ï¼‰
         Dialer& set_addr(std::string_view opt, const nng_sockaddr& val) noexcept {
             nng_dialer_set_addr(_My_dialer, opt.data(), &val);
             return *this;
         }
 
-        // »ñÈ¡²¼¶ûĞÍ²¦ºÅÆ÷Ñ¡Ïî
-        // ²ÎÊı£ºopt - Ñ¡ÏîÃû³Æ£¬val - ´æ´¢Ñ¡ÏîÖµµÄÖ¸Õë
-        // ·µ»Ø£º²Ù×÷½á¹û£¬0 ±íÊ¾³É¹¦
+        // è·å–å¸ƒå°”å‹æ‹¨å·å™¨é€‰é¡¹
+        // å‚æ•°ï¼šopt - é€‰é¡¹åç§°ï¼Œval - å­˜å‚¨é€‰é¡¹å€¼çš„æŒ‡é’ˆ
+        // è¿”å›ï¼šæ“ä½œç»“æœï¼Œ0 è¡¨ç¤ºæˆåŠŸ
         int get_bool(std::string_view opt, bool& val) const noexcept {
             return nng_dialer_get_bool(_My_dialer, opt.data(), &val);
         }
 
-        // »ñÈ¡ÕûĞÍ²¦ºÅÆ÷Ñ¡Ïî
-        // ²ÎÊı£ºopt - Ñ¡ÏîÃû³Æ£¬val - ´æ´¢Ñ¡ÏîÖµµÄÖ¸Õë
-        // ·µ»Ø£º²Ù×÷½á¹û£¬0 ±íÊ¾³É¹¦
+        // è·å–æ•´å‹æ‹¨å·å™¨é€‰é¡¹
+        // å‚æ•°ï¼šopt - é€‰é¡¹åç§°ï¼Œval - å­˜å‚¨é€‰é¡¹å€¼çš„æŒ‡é’ˆ
+        // è¿”å›ï¼šæ“ä½œç»“æœï¼Œ0 è¡¨ç¤ºæˆåŠŸ
         int get_int(std::string_view opt, int& val) const noexcept {
             return nng_dialer_get_int(_My_dialer, opt.data(), &val);
         }
 
-        // »ñÈ¡´óĞ¡ĞÍ²¦ºÅÆ÷Ñ¡Ïî
-        // ²ÎÊı£ºopt - Ñ¡ÏîÃû³Æ£¬val - ´æ´¢Ñ¡ÏîÖµµÄÖ¸Õë
-        // ·µ»Ø£º²Ù×÷½á¹û£¬0 ±íÊ¾³É¹¦
+        // è·å–å¤§å°å‹æ‹¨å·å™¨é€‰é¡¹
+        // å‚æ•°ï¼šopt - é€‰é¡¹åç§°ï¼Œval - å­˜å‚¨é€‰é¡¹å€¼çš„æŒ‡é’ˆ
+        // è¿”å›ï¼šæ“ä½œç»“æœï¼Œ0 è¡¨ç¤ºæˆåŠŸ
         int get_size(std::string_view opt, size_t& val) const noexcept {
             return nng_dialer_get_size(_My_dialer, opt.data(), &val);
         }
 
-        // »ñÈ¡ 64 Î»ÎŞ·ûºÅÕûĞÍ²¦ºÅÆ÷Ñ¡Ïî
-        // ²ÎÊı£ºopt - Ñ¡ÏîÃû³Æ£¬val - ´æ´¢Ñ¡ÏîÖµµÄÖ¸Õë
-        // ·µ»Ø£º²Ù×÷½á¹û£¬0 ±íÊ¾³É¹¦
+        // è·å– 64 ä½æ— ç¬¦å·æ•´å‹æ‹¨å·å™¨é€‰é¡¹
+        // å‚æ•°ï¼šopt - é€‰é¡¹åç§°ï¼Œval - å­˜å‚¨é€‰é¡¹å€¼çš„æŒ‡é’ˆ
+        // è¿”å›ï¼šæ“ä½œç»“æœï¼Œ0 è¡¨ç¤ºæˆåŠŸ
         int get_uint64(std::string_view opt, uint64_t& val) const noexcept {
             return nng_dialer_get_uint64(_My_dialer, opt.data(), &val);
         }
 
-        // »ñÈ¡×Ö·û´®ĞÍ²¦ºÅÆ÷Ñ¡Ïî
-        // ²ÎÊı£ºopt - Ñ¡ÏîÃû³Æ£¬val - ´æ´¢Ñ¡ÏîÖµµÄ×Ö·û´®
-        // ·µ»Ø£º²Ù×÷½á¹û£¬0 ±íÊ¾³É¹¦
+        // è·å–å­—ç¬¦ä¸²å‹æ‹¨å·å™¨é€‰é¡¹
+        // å‚æ•°ï¼šopt - é€‰é¡¹åç§°ï¼Œval - å­˜å‚¨é€‰é¡¹å€¼çš„å­—ç¬¦ä¸²
+        // è¿”å›ï¼šæ“ä½œç»“æœï¼Œ0 è¡¨ç¤ºæˆåŠŸ
         int get_string(std::string_view opt, std::string& val) const noexcept {
             char* out = nullptr;
             int rv = nng_dialer_get_string(_My_dialer, opt.data(), &out);
@@ -179,29 +179,29 @@ namespace nng
             return rv;
         }
 
-        // »ñÈ¡Ê±¼äĞÍ²¦ºÅÆ÷Ñ¡Ïî
-        // ²ÎÊı£ºopt - Ñ¡ÏîÃû³Æ£¬val - ´æ´¢Ñ¡ÏîÖµµÄÖ¸Õë
-        // ·µ»Ø£º²Ù×÷½á¹û£¬0 ±íÊ¾³É¹¦
+        // è·å–æ—¶é—´å‹æ‹¨å·å™¨é€‰é¡¹
+        // å‚æ•°ï¼šopt - é€‰é¡¹åç§°ï¼Œval - å­˜å‚¨é€‰é¡¹å€¼çš„æŒ‡é’ˆ
+        // è¿”å›ï¼šæ“ä½œç»“æœï¼Œ0 è¡¨ç¤ºæˆåŠŸ
         int get_ms(std::string_view opt, nng_duration& val) const noexcept {
             return nng_dialer_get_ms(_My_dialer, opt.data(), &val);
         }
 
-        // »ñÈ¡µØÖ·ĞÍ²¦ºÅÆ÷Ñ¡Ïî
-        // ²ÎÊı£ºopt - Ñ¡ÏîÃû³Æ£¬val - ´æ´¢µØÖ·ÖµµÄÖ¸Õë
-        // ·µ»Ø£º²Ù×÷½á¹û£¬0 ±íÊ¾³É¹¦
+        // è·å–åœ°å€å‹æ‹¨å·å™¨é€‰é¡¹
+        // å‚æ•°ï¼šopt - é€‰é¡¹åç§°ï¼Œval - å­˜å‚¨åœ°å€å€¼çš„æŒ‡é’ˆ
+        // è¿”å›ï¼šæ“ä½œç»“æœï¼Œ0 è¡¨ç¤ºæˆåŠŸ
         int get_addr(std::string_view opt, nng_sockaddr& val) const noexcept {
             return nng_dialer_get_addr(_My_dialer, opt.data(), &val);
         }
 
-        // »ñÈ¡²¦ºÅÆ÷µÄ URL
-        // ²ÎÊı£ºurl - ´æ´¢ URL µÄÖ¸Õë
-        // ·µ»Ø£º²Ù×÷½á¹û£¬0 ±íÊ¾³É¹¦
+        // è·å–æ‹¨å·å™¨çš„ URL
+        // å‚æ•°ï¼šurl - å­˜å‚¨ URL çš„æŒ‡é’ˆ
+        // è¿”å›ï¼šæ“ä½œç»“æœï¼Œ0 è¡¨ç¤ºæˆåŠŸ
         int get_url(const nng_url** url) const noexcept {
             return nng_dialer_get_url(_My_dialer, url);
         }
 
-        // ×ª»»Îª nng_dialer
-        // ·µ»Ø£ºµ±Ç°¹ÜÀíµÄ nng_dialer
+        // è½¬æ¢ä¸º nng_dialer
+        // è¿”å›ï¼šå½“å‰ç®¡ç†çš„ nng_dialer
         operator nng_dialer() const noexcept {
             return _My_dialer;
         }

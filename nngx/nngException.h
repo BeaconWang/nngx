@@ -24,21 +24,21 @@ namespace nng
 {
     enum { NNG_OK = 0 };
     using nng_err = int;
-    // Exception Àà£ºNNG ´íÎóÂë£¨nng_err£©µÄ C++ Òì³£°ü×°Àà
-    // ÓÃÍ¾£º·â×° NNG ´íÎóÂëºÍ´íÎóÏûÏ¢£¬Ìá¹©Òì³£´¦Àí»úÖÆ£¬¼Ì³Ğ×Ô std::runtime_error
-    // ÌØĞÔ£º
-    // - Ìá¹© NNG ´íÎóÂëµÄ´æ´¢ºÍ²éÑ¯
-    // - Òì³£°²È«£º¹¹Ôìº¯Êı¿ÉÄÜÅ×³ö std::bad_alloc
-    // - ÇáÁ¿Éè¼Æ£¬Óë NNG ´íÎóÂëÎŞ·ì¼¯³É
+    // Exception ç±»ï¼šNNG é”™è¯¯ç ï¼ˆnng_errï¼‰çš„ C++ å¼‚å¸¸åŒ…è£…ç±»
+    // ç”¨é€”ï¼šå°è£… NNG é”™è¯¯ç å’Œé”™è¯¯æ¶ˆæ¯ï¼Œæä¾›å¼‚å¸¸å¤„ç†æœºåˆ¶ï¼Œç»§æ‰¿è‡ª std::runtime_error
+    // ç‰¹æ€§ï¼š
+    // - æä¾› NNG é”™è¯¯ç çš„å­˜å‚¨å’ŒæŸ¥è¯¢
+    // - å¼‚å¸¸å®‰å…¨ï¼šæ„é€ å‡½æ•°å¯èƒ½æŠ›å‡º std::bad_alloc
+    // - è½»é‡è®¾è®¡ï¼Œä¸ NNG é”™è¯¯ç æ— ç¼é›†æˆ
     class Exception : public std::runtime_error {
     public:
-        // ¹¹Ôìº¯Êı£ºÊ¹ÓÃ NNG ´íÎóÂëºÍÏûÏ¢³õÊ¼»¯Òì³£
-        // ²ÎÊı£ºerr - NNG ´íÎóÂë£¬msg - ´íÎóÏûÏ¢
-        // Òì³££º¿ÉÄÜÅ×³ö std::bad_alloc£¨ÓÉ std::runtime_error Òı·¢£©
+        // æ„é€ å‡½æ•°ï¼šä½¿ç”¨ NNG é”™è¯¯ç å’Œæ¶ˆæ¯åˆå§‹åŒ–å¼‚å¸¸
+        // å‚æ•°ï¼šerr - NNG é”™è¯¯ç ï¼Œmsg - é”™è¯¯æ¶ˆæ¯
+        // å¼‚å¸¸ï¼šå¯èƒ½æŠ›å‡º std::bad_allocï¼ˆç”± std::runtime_error å¼•å‘ï¼‰
         Exception(nng_err err, std::string_view msg)
             noexcept(false) : std::runtime_error(msg.data()), _My_err(err) {}
-        // »ñÈ¡ NNG ´íÎóÂë
-        // ·µ»Ø£º´æ´¢µÄ NNG ´íÎóÂë
+        // è·å– NNG é”™è¯¯ç 
+        // è¿”å›ï¼šå­˜å‚¨çš„ NNG é”™è¯¯ç 
         nng_err get_error() const noexcept { return _My_err; }
 
     private:

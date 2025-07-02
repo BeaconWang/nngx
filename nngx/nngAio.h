@@ -5,20 +5,20 @@
 
 namespace nng
 {
-    // Aio Àà£ºNNG Òì²½ I/O£¨nng_aio£©µÄ C++ RAII °ü×°Àà
-    // ÓÃÍ¾£ºÌá¹©¶Ô NNG Òì²½ I/O ²Ù×÷µÄ±ã½İ¹ÜÀí£¬Ö§³ÖÉèÖÃÏûÏ¢¡¢ÊäÈë/Êä³ö²ÎÊı¡¢³¬Ê±¡¢È¡ÏûºÍµÈ´ıµÈ²Ù×÷
-    // ÌØĞÔ£º
-    // - Ê¹ÓÃ RAII ¹ÜÀí nng_aio ×ÊÔ´£¬È·±£×Ô¶¯ÊÍ·Å
-    // - Ö§³ÖÒÆ¶¯¹¹ÔìºÍÒÆ¶¯¸³Öµ£¬½ûÓÃ¿½±´ÒÔ±£Ö¤×ÊÔ´¶ÀÕ¼
-    // - Ìá¹©Òì²½²Ù×÷µÄÅäÖÃºÍ²éÑ¯¹¦ÄÜ
-    // - Òì³£°²È«£º·ÖÅäÊ§°ÜÊ±Å×³ö Exception
+    // Aio ç±»ï¼šNNG å¼‚æ­¥ I/Oï¼ˆnng_aioï¼‰çš„ C++ RAII åŒ…è£…ç±»
+    // ç”¨é€”ï¼šæä¾›å¯¹ NNG å¼‚æ­¥ I/O æ“ä½œçš„ä¾¿æ·ç®¡ç†ï¼Œæ”¯æŒè®¾ç½®æ¶ˆæ¯ã€è¾“å…¥/è¾“å‡ºå‚æ•°ã€è¶…æ—¶ã€å–æ¶ˆå’Œç­‰å¾…ç­‰æ“ä½œ
+    // ç‰¹æ€§ï¼š
+    // - ä½¿ç”¨ RAII ç®¡ç† nng_aio èµ„æºï¼Œç¡®ä¿è‡ªåŠ¨é‡Šæ”¾
+    // - æ”¯æŒç§»åŠ¨æ„é€ å’Œç§»åŠ¨èµ‹å€¼ï¼Œç¦ç”¨æ‹·è´ä»¥ä¿è¯èµ„æºç‹¬å 
+    // - æä¾›å¼‚æ­¥æ“ä½œçš„é…ç½®å’ŒæŸ¥è¯¢åŠŸèƒ½
+    // - å¼‚å¸¸å®‰å…¨ï¼šåˆ†é…å¤±è´¥æ—¶æŠ›å‡º Exception
     class Aio {
     public:
         using _Callback_t = void (*)(void*);
 
-        // ¹¹Ôìº¯Êı£º³õÊ¼»¯Òì²½ I/O ¶ÔÏó
-        // ²ÎÊı£ºcallback - »Øµ÷º¯ÊıÖ¸Õë£¬callback_context - »Øµ÷ÉÏÏÂÎÄÖ¸Õë
-        // Òì³££ºÈô·ÖÅäÊ§°Ü£¬Å×³ö Exception
+        // æ„é€ å‡½æ•°ï¼šåˆå§‹åŒ–å¼‚æ­¥ I/O å¯¹è±¡
+        // å‚æ•°ï¼šcallback - å›è°ƒå‡½æ•°æŒ‡é’ˆï¼Œcallback_context - å›è°ƒä¸Šä¸‹æ–‡æŒ‡é’ˆ
+        // å¼‚å¸¸ï¼šè‹¥åˆ†é…å¤±è´¥ï¼ŒæŠ›å‡º Exception
         Aio(_Callback_t callback = nullptr, void* callback_context = nullptr) noexcept(false) {
             int rv = nng_aio_alloc(&_My_aio, callback, callback_context);
             if (rv != NNG_OK) {
@@ -26,28 +26,28 @@ namespace nng
             }
         }
 
-        // Îö¹¹º¯Êı£ºÊÍ·ÅÒì²½ I/O ×ÊÔ´
+        // ææ„å‡½æ•°ï¼šé‡Šæ”¾å¼‚æ­¥ I/O èµ„æº
         virtual ~Aio() noexcept {
             if (_My_aio) {
                 nng_aio_free(_My_aio);
             }
         }
 
-        // ½ûÓÃ¿½±´¹¹Ôìº¯Êı
+        // ç¦ç”¨æ‹·è´æ„é€ å‡½æ•°
         Aio(const Aio&) = delete;
 
-        // ½ûÓÃ¿½±´¸³ÖµÔËËã·û
+        // ç¦ç”¨æ‹·è´èµ‹å€¼è¿ç®—ç¬¦
         Aio& operator=(const Aio&) = delete;
 
-        // ÒÆ¶¯¹¹Ôìº¯Êı£º×ªÒÆÒì²½ I/O ËùÓĞÈ¨
-        // ²ÎÊı£ºother - Ô´ Aio ¶ÔÏó
+        // ç§»åŠ¨æ„é€ å‡½æ•°ï¼šè½¬ç§»å¼‚æ­¥ I/O æ‰€æœ‰æƒ
+        // å‚æ•°ï¼šother - æº Aio å¯¹è±¡
         Aio(Aio&& other) noexcept : _My_aio(other._My_aio) {
             other._My_aio = nullptr;
         }
 
-        // ÒÆ¶¯¸³ÖµÔËËã·û£º×ªÒÆÒì²½ I/O ËùÓĞÈ¨
-        // ²ÎÊı£ºother - Ô´ Aio ¶ÔÏó
-        // ·µ»Ø£ºµ±Ç°¶ÔÏóµÄÒıÓÃ
+        // ç§»åŠ¨èµ‹å€¼è¿ç®—ç¬¦ï¼šè½¬ç§»å¼‚æ­¥ I/O æ‰€æœ‰æƒ
+        // å‚æ•°ï¼šother - æº Aio å¯¹è±¡
+        // è¿”å›ï¼šå½“å‰å¯¹è±¡çš„å¼•ç”¨
         Aio& operator=(Aio&& other) noexcept {
             if (this != &other) {
                 if (_My_aio) {
@@ -59,121 +59,121 @@ namespace nng
             return *this;
         }
 
-        // ÉèÖÃÒì²½ I/O µÄÏûÏ¢
-        // ²ÎÊı£ºmsg - ÒªÉèÖÃµÄ nng_msg Ö¸Õë
+        // è®¾ç½®å¼‚æ­¥ I/O çš„æ¶ˆæ¯
+        // å‚æ•°ï¼šmsg - è¦è®¾ç½®çš„ nng_msg æŒ‡é’ˆ
         void set_msg(nng_msg* msg) noexcept {
             nng_aio_set_msg(_My_aio, msg);
         }
 
-        // ÉèÖÃÒì²½ I/O µÄÏûÏ¢£¨Í¨¹ıÒÆ¶¯ Msg ¶ÔÏó£©
-        // ²ÎÊı£ºmsg - ÒªÉèÖÃµÄ Msg ¶ÔÏó
+        // è®¾ç½®å¼‚æ­¥ I/O çš„æ¶ˆæ¯ï¼ˆé€šè¿‡ç§»åŠ¨ Msg å¯¹è±¡ï¼‰
+        // å‚æ•°ï¼šmsg - è¦è®¾ç½®çš„ Msg å¯¹è±¡
         void set_msg(Msg&& msg) noexcept {
             nng_aio_set_msg(_My_aio, msg.release());
         }
 
-        // »ñÈ¡Òì²½ I/O µÄÏûÏ¢
-        // ·µ»Ø£º°üº¬µ±Ç°ÏûÏ¢µÄ Msg ¶ÔÏó
+        // è·å–å¼‚æ­¥ I/O çš„æ¶ˆæ¯
+        // è¿”å›ï¼šåŒ…å«å½“å‰æ¶ˆæ¯çš„ Msg å¯¹è±¡
         Msg get_msg() const noexcept {
             return Msg(nng_aio_get_msg(_My_aio));
         }
 
-        // ÊÍ·ÅÒì²½ I/O µÄÏûÏ¢
-        // ·µ»Ø£º°üº¬ÊÍ·ÅÏûÏ¢µÄ Msg ¶ÔÏó
+        // é‡Šæ”¾å¼‚æ­¥ I/O çš„æ¶ˆæ¯
+        // è¿”å›ï¼šåŒ…å«é‡Šæ”¾æ¶ˆæ¯çš„ Msg å¯¹è±¡
         Msg release_msg() const noexcept {
             auto m = nng_aio_get_msg(_My_aio);
             nng_aio_set_msg(_My_aio, nullptr);
             return Msg(m);
         }
 
-        // ÉèÖÃÒì²½ I/O µÄ³¬Ê±Ê±¼ä
-        // ²ÎÊı£ºtimeout - ³¬Ê±Ê±¼ä£¨ºÁÃë£©
+        // è®¾ç½®å¼‚æ­¥ I/O çš„è¶…æ—¶æ—¶é—´
+        // å‚æ•°ï¼štimeout - è¶…æ—¶æ—¶é—´ï¼ˆæ¯«ç§’ï¼‰
         void set_timeout(nng_duration timeout) noexcept {
             nng_aio_set_timeout(_My_aio, timeout);
         }
 
-        // ÉèÖÃÒì²½ I/O µÄ¾ø¶Ô¹ıÆÚÊ±¼ä
-        // ²ÎÊı£ºexpire - ¾ø¶Ô¹ıÆÚÊ±¼ä
+        // è®¾ç½®å¼‚æ­¥ I/O çš„ç»å¯¹è¿‡æœŸæ—¶é—´
+        // å‚æ•°ï¼šexpire - ç»å¯¹è¿‡æœŸæ—¶é—´
         void set_expire(nng_time expire) noexcept {
             nng_aio_set_expire(_My_aio, expire);
         }
 
-        // ÉèÖÃÒì²½ I/O µÄ I/O ÏòÁ¿
-        // ²ÎÊı£ºcnt - I/O ÏòÁ¿ÊıÁ¿£¬iov - I/O ÏòÁ¿Êı×é
-        // ·µ»Ø£º²Ù×÷½á¹û£¬0 ±íÊ¾³É¹¦
+        // è®¾ç½®å¼‚æ­¥ I/O çš„ I/O å‘é‡
+        // å‚æ•°ï¼šcnt - I/O å‘é‡æ•°é‡ï¼Œiov - I/O å‘é‡æ•°ç»„
+        // è¿”å›ï¼šæ“ä½œç»“æœï¼Œ0 è¡¨ç¤ºæˆåŠŸ
         int set_iov(unsigned cnt, const nng_iov* iov) noexcept {
             return nng_aio_set_iov(_My_aio, cnt, iov);
         }
 
-        // ÉèÖÃÒì²½ I/O µÄÊäÈë²ÎÊı
-        // ²ÎÊı£ºindex - ÊäÈë²ÎÊıË÷Òı£¬data - ÊäÈë²ÎÊıÊı¾İ
-        // ·µ»Ø£º²Ù×÷½á¹û£¬0 ±íÊ¾³É¹¦
+        // è®¾ç½®å¼‚æ­¥ I/O çš„è¾“å…¥å‚æ•°
+        // å‚æ•°ï¼šindex - è¾“å…¥å‚æ•°ç´¢å¼•ï¼Œdata - è¾“å…¥å‚æ•°æ•°æ®
+        // è¿”å›ï¼šæ“ä½œç»“æœï¼Œ0 è¡¨ç¤ºæˆåŠŸ
         int set_input(unsigned index, void* data) noexcept {
             return nng_aio_set_input(_My_aio, index, data);
         }
 
-        // »ñÈ¡Òì²½ I/O µÄÊäÈë²ÎÊı
-        // ²ÎÊı£ºindex - ÊäÈë²ÎÊıË÷Òı
-        // ·µ»Ø£ºÊäÈë²ÎÊıÊı¾İÖ¸Õë
+        // è·å–å¼‚æ­¥ I/O çš„è¾“å…¥å‚æ•°
+        // å‚æ•°ï¼šindex - è¾“å…¥å‚æ•°ç´¢å¼•
+        // è¿”å›ï¼šè¾“å…¥å‚æ•°æ•°æ®æŒ‡é’ˆ
         void* get_input(unsigned index) const noexcept {
             return nng_aio_get_input(_My_aio, index);
         }
 
-        // ÉèÖÃÒì²½ I/O µÄÊä³ö²ÎÊı
-        // ²ÎÊı£ºindex - Êä³ö²ÎÊıË÷Òı£¬data - Êä³ö²ÎÊıÊı¾İ
-        // ·µ»Ø£º²Ù×÷½á¹û£¬0 ±íÊ¾³É¹¦
+        // è®¾ç½®å¼‚æ­¥ I/O çš„è¾“å‡ºå‚æ•°
+        // å‚æ•°ï¼šindex - è¾“å‡ºå‚æ•°ç´¢å¼•ï¼Œdata - è¾“å‡ºå‚æ•°æ•°æ®
+        // è¿”å›ï¼šæ“ä½œç»“æœï¼Œ0 è¡¨ç¤ºæˆåŠŸ
         int set_output(unsigned index, void* data) noexcept {
             return nng_aio_set_output(_My_aio, index, data);
         }
 
-        // »ñÈ¡Òì²½ I/O µÄÊä³ö²ÎÊı
-        // ²ÎÊı£ºindex - Êä³ö²ÎÊıË÷Òı
-        // ·µ»Ø£ºÊä³ö²ÎÊıÊı¾İÖ¸Õë
+        // è·å–å¼‚æ­¥ I/O çš„è¾“å‡ºå‚æ•°
+        // å‚æ•°ï¼šindex - è¾“å‡ºå‚æ•°ç´¢å¼•
+        // è¿”å›ï¼šè¾“å‡ºå‚æ•°æ•°æ®æŒ‡é’ˆ
         void* get_output(unsigned index) const noexcept {
             return nng_aio_get_output(_My_aio, index);
         }
 
-        // È¡ÏûÒì²½ I/O ²Ù×÷
+        // å–æ¶ˆå¼‚æ­¥ I/O æ“ä½œ
         void cancel() noexcept {
             nng_aio_cancel(_My_aio);
         }
 
-        // ÖĞÖ¹Òì²½ I/O ²Ù×÷
-        // ²ÎÊı£ºerr - ÖĞÖ¹²Ù×÷µÄ´íÎóÂë
+        // ä¸­æ­¢å¼‚æ­¥ I/O æ“ä½œ
+        // å‚æ•°ï¼šerr - ä¸­æ­¢æ“ä½œçš„é”™è¯¯ç 
         void abort(nng_err err) noexcept {
             nng_aio_abort(_My_aio, err);
         }
 
-        // µÈ´ıÒì²½ I/O ²Ù×÷Íê³É
+        // ç­‰å¾…å¼‚æ­¥ I/O æ“ä½œå®Œæˆ
         void wait() noexcept {
             nng_aio_wait(_My_aio);
         }
 
-        // Ö´ĞĞÒì²½Ë¯Ãß²Ù×÷
-        // ²ÎÊı£ºms - Ë¯ÃßÊ±¼ä£¨ºÁÃë£©
+        // æ‰§è¡Œå¼‚æ­¥ç¡çœ æ“ä½œ
+        // å‚æ•°ï¼šms - ç¡çœ æ—¶é—´ï¼ˆæ¯«ç§’ï¼‰
         void sleep(nng_duration ms) noexcept {
             nng_sleep_aio(ms, _My_aio);
         }
 
-        // ¼ì²éÒì²½ I/O ÊÇ·ñÃ¦Âµ
-        // ·µ»Ø£ºtrue ±íÊ¾Ã¦Âµ£¬false ±íÊ¾¿ÕÏĞ
+        // æ£€æŸ¥å¼‚æ­¥ I/O æ˜¯å¦å¿™ç¢Œ
+        // è¿”å›ï¼štrue è¡¨ç¤ºå¿™ç¢Œï¼Œfalse è¡¨ç¤ºç©ºé—²
         bool is_busy() const noexcept {
             return nng_aio_busy(_My_aio);
         }
 
-        // »ñÈ¡Òì²½ I/O ²Ù×÷µÄ½á¹û
-        // ·µ»Ø£º²Ù×÷½á¹ûµÄ´íÎóÂë
+        // è·å–å¼‚æ­¥ I/O æ“ä½œçš„ç»“æœ
+        // è¿”å›ï¼šæ“ä½œç»“æœçš„é”™è¯¯ç 
         nng_err result() const noexcept {
             return nng_aio_result(_My_aio);
         }
 
-        // »ñÈ¡Òì²½ I/O µÄ¼ÆÊı
-        // ·µ»Ø£º²Ù×÷µÄ¼ÆÊı
+        // è·å–å¼‚æ­¥ I/O çš„è®¡æ•°
+        // è¿”å›ï¼šæ“ä½œçš„è®¡æ•°
         size_t count() const noexcept {
             return nng_aio_count(_My_aio);
         }
 
-        // ×ª»»Îª nng_aio Ö¸Õë
-        // ·µ»Ø£ºµ±Ç°¹ÜÀíµÄ nng_aio Ö¸Õë
+        // è½¬æ¢ä¸º nng_aio æŒ‡é’ˆ
+        // è¿”å›ï¼šå½“å‰ç®¡ç†çš„ nng_aio æŒ‡é’ˆ
         operator nng_aio* () const noexcept {
             return _My_aio;
         }

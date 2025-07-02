@@ -5,22 +5,22 @@
 
 namespace nng
 {
-    // Listener Àà£ºNNG ¼àÌıÆ÷£¨nng_listener£©µÄ C++ RAII °ü×°Àà
-    // ÓÃÍ¾£ºÌá¹©¶Ô NNG ¼àÌıÆ÷µÄ±ã½İ¹ÜÀí£¬Ö§³Ö¼àÌıÆ÷µÄ´´½¨¡¢Æô¶¯¡¢¹Ø±ÕºÍÑ¡ÏîÅäÖÃ
-    // ÌØĞÔ£º
-    // - Ê¹ÓÃ RAII ¹ÜÀí nng_listener ×ÊÔ´£¬È·±£×Ô¶¯ÊÍ·Å
-    // - Ö§³ÖÒÆ¶¯¹¹ÔìºÍÒÆ¶¯¸³Öµ£¬½ûÓÃ¿½±´ÒÔ±£Ö¤×ÊÔ´¶ÀÕ¼
-    // - Ìá¹©Ñ¡ÏîÅäÖÃ½Ó¿Ú£¬Ö§³Ö¶àÖÖÊı¾İÀàĞÍµÄÉèÖÃºÍ»ñÈ¡
-    // - Òì³£°²È«£º¼àÌıÆ÷´´½¨Ê§°ÜÊ±Å×³ö Exception
+    // Listener ç±»ï¼šNNG ç›‘å¬å™¨ï¼ˆnng_listenerï¼‰çš„ C++ RAII åŒ…è£…ç±»
+    // ç”¨é€”ï¼šæä¾›å¯¹ NNG ç›‘å¬å™¨çš„ä¾¿æ·ç®¡ç†ï¼Œæ”¯æŒç›‘å¬å™¨çš„åˆ›å»ºã€å¯åŠ¨ã€å…³é—­å’Œé€‰é¡¹é…ç½®
+    // ç‰¹æ€§ï¼š
+    // - ä½¿ç”¨ RAII ç®¡ç† nng_listener èµ„æºï¼Œç¡®ä¿è‡ªåŠ¨é‡Šæ”¾
+    // - æ”¯æŒç§»åŠ¨æ„é€ å’Œç§»åŠ¨èµ‹å€¼ï¼Œç¦ç”¨æ‹·è´ä»¥ä¿è¯èµ„æºç‹¬å 
+    // - æä¾›é€‰é¡¹é…ç½®æ¥å£ï¼Œæ”¯æŒå¤šç§æ•°æ®ç±»å‹çš„è®¾ç½®å’Œè·å–
+    // - å¼‚å¸¸å®‰å…¨ï¼šç›‘å¬å™¨åˆ›å»ºå¤±è´¥æ—¶æŠ›å‡º Exception
     class Listener
         : public Hooker<Listener> {
     public:
-        // Ä¬ÈÏ¹¹Ôìº¯Êı£º´´½¨Î´³õÊ¼»¯µÄ¼àÌıÆ÷
+        // é»˜è®¤æ„é€ å‡½æ•°ï¼šåˆ›å»ºæœªåˆå§‹åŒ–çš„ç›‘å¬å™¨
         Listener() noexcept = default;
 
-        // ¹¹Ôìº¯Êı£ºÎªÖ¸¶¨Ì×½Ó×ÖºÍµØÖ·´´½¨¼àÌıÆ÷
-        // ²ÎÊı£ºsock - NNG Ì×½Ó×Ö£¬addr - ¼àÌıµØÖ·
-        // Òì³££ºÈô´´½¨Ê§°Ü£¬Å×³ö Exception
+        // æ„é€ å‡½æ•°ï¼šä¸ºæŒ‡å®šå¥—æ¥å­—å’Œåœ°å€åˆ›å»ºç›‘å¬å™¨
+        // å‚æ•°ï¼šsock - NNG å¥—æ¥å­—ï¼Œaddr - ç›‘å¬åœ°å€
+        // å¼‚å¸¸ï¼šè‹¥åˆ›å»ºå¤±è´¥ï¼ŒæŠ›å‡º Exception
         Listener(nng_socket sock, std::string_view addr) noexcept(false) {
             int rv = nng_listener_create(&_My_listener, sock, Hooker<Listener>::_Pre_address(addr).c_str());
             if (rv != NNG_OK) {
@@ -28,20 +28,20 @@ namespace nng
             }
         }
 
-        // Îö¹¹º¯Êı£º¹Ø±Õ²¢ÊÍ·Å¼àÌıÆ÷×ÊÔ´
+        // ææ„å‡½æ•°ï¼šå…³é—­å¹¶é‡Šæ”¾ç›‘å¬å™¨èµ„æº
         virtual ~Listener() noexcept {
             close();
         }
 
-        // ÒÆ¶¯¹¹Ôìº¯Êı£º×ªÒÆ¼àÌıÆ÷ËùÓĞÈ¨
-        // ²ÎÊı£ºother - Ô´ Listener ¶ÔÏó
+        // ç§»åŠ¨æ„é€ å‡½æ•°ï¼šè½¬ç§»ç›‘å¬å™¨æ‰€æœ‰æƒ
+        // å‚æ•°ï¼šother - æº Listener å¯¹è±¡
         Listener(Listener&& other) noexcept : _My_listener(other._My_listener) {
             other._My_listener.id = 0;
         }
 
-        // ÒÆ¶¯¸³ÖµÔËËã·û£º×ªÒÆ¼àÌıÆ÷ËùÓĞÈ¨
-        // ²ÎÊı£ºother - Ô´ Listener ¶ÔÏó
-        // ·µ»Ø£ºµ±Ç°¶ÔÏóµÄÒıÓÃ
+        // ç§»åŠ¨èµ‹å€¼è¿ç®—ç¬¦ï¼šè½¬ç§»ç›‘å¬å™¨æ‰€æœ‰æƒ
+        // å‚æ•°ï¼šother - æº Listener å¯¹è±¡
+        // è¿”å›ï¼šå½“å‰å¯¹è±¡çš„å¼•ç”¨
         Listener& operator=(Listener&& other) noexcept {
             if (this != &other) {
                 close();
@@ -51,21 +51,21 @@ namespace nng
             return *this;
         }
 
-        // ½ûÓÃ¿½±´¹¹Ôìº¯Êı
+        // ç¦ç”¨æ‹·è´æ„é€ å‡½æ•°
         Listener(const Listener&) = delete;
 
-        // ½ûÓÃ¿½±´¸³ÖµÔËËã·û
+        // ç¦ç”¨æ‹·è´èµ‹å€¼è¿ç®—ç¬¦
         Listener& operator=(const Listener&) = delete;
 
-        // Æô¶¯¼àÌıÆ÷
-        // ²ÎÊı£ºflags - Æô¶¯±êÖ¾£¬Ä¬ÈÏÎª 0
-        // ·µ»Ø£º²Ù×÷½á¹û£¬0 ±íÊ¾³É¹¦
+        // å¯åŠ¨ç›‘å¬å™¨
+        // å‚æ•°ï¼šflags - å¯åŠ¨æ ‡å¿—ï¼Œé»˜è®¤ä¸º 0
+        // è¿”å›ï¼šæ“ä½œç»“æœï¼Œ0 è¡¨ç¤ºæˆåŠŸ
         int start(int flags = 0) noexcept {
             _Pre_start(*this);
             return nng_listener_start(_My_listener, flags);
         }
 
-        // ¹Ø±Õ¼àÌıÆ÷
+        // å…³é—­ç›‘å¬å™¨
         void close() noexcept {
             if (valid()) {
                 nng_listener_close(_My_listener);
@@ -73,112 +73,112 @@ namespace nng
             }
         }
 
-        // »ñÈ¡¼àÌıÆ÷ ID
-        // ·µ»Ø£º¼àÌıÆ÷µÄ ID
+        // è·å–ç›‘å¬å™¨ ID
+        // è¿”å›ï¼šç›‘å¬å™¨çš„ ID
         int id() const noexcept {
             return nng_listener_id(_My_listener);
         }
 
-        // ¼ì²é¼àÌıÆ÷ÊÇ·ñÓĞĞ§
-        // ·µ»Ø£ºtrue ±íÊ¾ÓĞĞ§£¬false ±íÊ¾ÎŞĞ§
+        // æ£€æŸ¥ç›‘å¬å™¨æ˜¯å¦æœ‰æ•ˆ
+        // è¿”å›ï¼štrue è¡¨ç¤ºæœ‰æ•ˆï¼Œfalse è¡¨ç¤ºæ— æ•ˆ
         bool valid() const noexcept {
             return _My_listener.id != 0;
         }
 
-        // ÉèÖÃÖ¸ÕëĞÍ¼àÌıÆ÷Ñ¡Ïî
-        // ²ÎÊı£ºopt - Ñ¡ÏîÃû³Æ£¬val - Ñ¡ÏîÖµ£¨Ö¸Õë£©
-        // ·µ»Ø£º²Ù×÷½á¹û£¬0 ±íÊ¾³É¹¦
+        // è®¾ç½®æŒ‡é’ˆå‹ç›‘å¬å™¨é€‰é¡¹
+        // å‚æ•°ï¼šopt - é€‰é¡¹åç§°ï¼Œval - é€‰é¡¹å€¼ï¼ˆæŒ‡é’ˆï¼‰
+        // è¿”å›ï¼šæ“ä½œç»“æœï¼Œ0 è¡¨ç¤ºæˆåŠŸ
         int set_ptr(std::string_view opt, void* val) noexcept {
             return nng_listener_set_ptr(_My_listener, opt.data(), val);
         }
 
-        // »ñÈ¡Ö¸ÕëĞÍ¼àÌıÆ÷Ñ¡Ïî
-        // ²ÎÊı£ºopt - Ñ¡ÏîÃû³Æ£¬val - ´æ´¢Ñ¡ÏîÖµµÄÖ¸Õë
-        // ·µ»Ø£º²Ù×÷½á¹û£¬0 ±íÊ¾³É¹¦
+        // è·å–æŒ‡é’ˆå‹ç›‘å¬å™¨é€‰é¡¹
+        // å‚æ•°ï¼šopt - é€‰é¡¹åç§°ï¼Œval - å­˜å‚¨é€‰é¡¹å€¼çš„æŒ‡é’ˆ
+        // è¿”å›ï¼šæ“ä½œç»“æœï¼Œ0 è¡¨ç¤ºæˆåŠŸ
         int get_ptr(std::string_view opt, void** val) const noexcept {
             return nng_listener_get_ptr(_My_listener, opt.data(), val);
         }
 
-        // ÉèÖÃ²¼¶ûĞÍ¼àÌıÆ÷Ñ¡Ïî
-        // ²ÎÊı£ºopt - Ñ¡ÏîÃû³Æ£¬val - Ñ¡ÏîÖµ
-        // ·µ»Ø£º²Ù×÷½á¹û£¬0 ±íÊ¾³É¹¦
+        // è®¾ç½®å¸ƒå°”å‹ç›‘å¬å™¨é€‰é¡¹
+        // å‚æ•°ï¼šopt - é€‰é¡¹åç§°ï¼Œval - é€‰é¡¹å€¼
+        // è¿”å›ï¼šæ“ä½œç»“æœï¼Œ0 è¡¨ç¤ºæˆåŠŸ
         int set_bool(std::string_view opt, bool val) noexcept {
             return nng_listener_set_bool(_My_listener, opt.data(), val);
         }
 
-        // ÉèÖÃÕûĞÍ¼àÌıÆ÷Ñ¡Ïî
-        // ²ÎÊı£ºopt - Ñ¡ÏîÃû³Æ£¬val - Ñ¡ÏîÖµ
-        // ·µ»Ø£º²Ù×÷½á¹û£¬0 ±íÊ¾³É¹¦
+        // è®¾ç½®æ•´å‹ç›‘å¬å™¨é€‰é¡¹
+        // å‚æ•°ï¼šopt - é€‰é¡¹åç§°ï¼Œval - é€‰é¡¹å€¼
+        // è¿”å›ï¼šæ“ä½œç»“æœï¼Œ0 è¡¨ç¤ºæˆåŠŸ
         int set_int(std::string_view opt, int val) noexcept {
             return nng_listener_set_int(_My_listener, opt.data(), val);
         }
 
-        // ÉèÖÃ´óĞ¡ĞÍ¼àÌıÆ÷Ñ¡Ïî
-        // ²ÎÊı£ºopt - Ñ¡ÏîÃû³Æ£¬val - Ñ¡ÏîÖµ
-        // ·µ»Ø£º²Ù×÷½á¹û£¬0 ±íÊ¾³É¹¦
+        // è®¾ç½®å¤§å°å‹ç›‘å¬å™¨é€‰é¡¹
+        // å‚æ•°ï¼šopt - é€‰é¡¹åç§°ï¼Œval - é€‰é¡¹å€¼
+        // è¿”å›ï¼šæ“ä½œç»“æœï¼Œ0 è¡¨ç¤ºæˆåŠŸ
         int set_size(std::string_view opt, size_t val) noexcept {
             return nng_listener_set_size(_My_listener, opt.data(), val);
         }
 
-        // ÉèÖÃÊ±¼äĞÍ¼àÌıÆ÷Ñ¡Ïî
-        // ²ÎÊı£ºopt - Ñ¡ÏîÃû³Æ£¬val - Ñ¡ÏîÖµ£¨ºÁÃë£©
-        // ·µ»Ø£º²Ù×÷½á¹û£¬0 ±íÊ¾³É¹¦
+        // è®¾ç½®æ—¶é—´å‹ç›‘å¬å™¨é€‰é¡¹
+        // å‚æ•°ï¼šopt - é€‰é¡¹åç§°ï¼Œval - é€‰é¡¹å€¼ï¼ˆæ¯«ç§’ï¼‰
+        // è¿”å›ï¼šæ“ä½œç»“æœï¼Œ0 è¡¨ç¤ºæˆåŠŸ
         int set_ms(std::string_view opt, nng_duration val) noexcept {
             return nng_listener_set_ms(_My_listener, opt.data(), val);
         }
 
-        // ÉèÖÃ 64 Î»ÎŞ·ûºÅÕûĞÍ¼àÌıÆ÷Ñ¡Ïî
-        // ²ÎÊı£ºopt - Ñ¡ÏîÃû³Æ£¬val - Ñ¡ÏîÖµ
-        // ·µ»Ø£º²Ù×÷½á¹û£¬0 ±íÊ¾³É¹¦
+        // è®¾ç½® 64 ä½æ— ç¬¦å·æ•´å‹ç›‘å¬å™¨é€‰é¡¹
+        // å‚æ•°ï¼šopt - é€‰é¡¹åç§°ï¼Œval - é€‰é¡¹å€¼
+        // è¿”å›ï¼šæ“ä½œç»“æœï¼Œ0 è¡¨ç¤ºæˆåŠŸ
         int set_uint64(std::string_view opt, uint64_t val) noexcept {
             return nng_listener_set_uint64(_My_listener, opt.data(), val);
         }
 
-        // ÉèÖÃ×Ö·û´®ĞÍ¼àÌıÆ÷Ñ¡Ïî
-        // ²ÎÊı£ºopt - Ñ¡ÏîÃû³Æ£¬val - Ñ¡ÏîÖµ
-        // ·µ»Ø£º²Ù×÷½á¹û£¬0 ±íÊ¾³É¹¦
+        // è®¾ç½®å­—ç¬¦ä¸²å‹ç›‘å¬å™¨é€‰é¡¹
+        // å‚æ•°ï¼šopt - é€‰é¡¹åç§°ï¼Œval - é€‰é¡¹å€¼
+        // è¿”å›ï¼šæ“ä½œç»“æœï¼Œ0 è¡¨ç¤ºæˆåŠŸ
         int set_string(std::string_view opt, std::string_view val) noexcept {
             return nng_listener_set_string(_My_listener, opt.data(), val.data());
         }
 
-        // »ñÈ¡²¼¶ûĞÍ¼àÌıÆ÷Ñ¡Ïî
-        // ²ÎÊı£ºopt - Ñ¡ÏîÃû³Æ£¬val - ´æ´¢Ñ¡ÏîÖµµÄÖ¸Õë
-        // ·µ»Ø£º²Ù×÷½á¹û£¬0 ±íÊ¾³É¹¦
+        // è·å–å¸ƒå°”å‹ç›‘å¬å™¨é€‰é¡¹
+        // å‚æ•°ï¼šopt - é€‰é¡¹åç§°ï¼Œval - å­˜å‚¨é€‰é¡¹å€¼çš„æŒ‡é’ˆ
+        // è¿”å›ï¼šæ“ä½œç»“æœï¼Œ0 è¡¨ç¤ºæˆåŠŸ
         int get_bool(std::string_view opt, bool& val) const noexcept {
             return nng_listener_get_bool(_My_listener, opt.data(), &val);
         }
 
-        // »ñÈ¡ÕûĞÍ¼àÌıÆ÷Ñ¡Ïî
-        // ²ÎÊı£ºopt - Ñ¡ÏîÃû³Æ£¬val - ´æ´¢Ñ¡ÏîÖµµÄÖ¸Õë
-        // ·µ»Ø£º²Ù×÷½á¹û£¬0 ±íÊ¾³É¹¦
+        // è·å–æ•´å‹ç›‘å¬å™¨é€‰é¡¹
+        // å‚æ•°ï¼šopt - é€‰é¡¹åç§°ï¼Œval - å­˜å‚¨é€‰é¡¹å€¼çš„æŒ‡é’ˆ
+        // è¿”å›ï¼šæ“ä½œç»“æœï¼Œ0 è¡¨ç¤ºæˆåŠŸ
         int get_int(std::string_view opt, int& val) const noexcept {
             return nng_listener_get_int(_My_listener, opt.data(), &val);
         }
 
-        // »ñÈ¡´óĞ¡ĞÍ¼àÌıÆ÷Ñ¡Ïî
-        // ²ÎÊı£ºopt - Ñ¡ÏîÃû³Æ£¬val - ´æ´¢Ñ¡ÏîÖµµÄÖ¸Õë
-        // ·µ»Ø£º²Ù×÷½á¹û£¬0 ±íÊ¾³É¹¦
+        // è·å–å¤§å°å‹ç›‘å¬å™¨é€‰é¡¹
+        // å‚æ•°ï¼šopt - é€‰é¡¹åç§°ï¼Œval - å­˜å‚¨é€‰é¡¹å€¼çš„æŒ‡é’ˆ
+        // è¿”å›ï¼šæ“ä½œç»“æœï¼Œ0 è¡¨ç¤ºæˆåŠŸ
         int get_size(std::string_view opt, size_t& val) const noexcept {
             return nng_listener_get_size(_My_listener, opt.data(), &val);
         }
 
-        // »ñÈ¡Ê±¼äĞÍ¼àÌıÆ÷Ñ¡Ïî
-        // ²ÎÊı£ºopt - Ñ¡ÏîÃû³Æ£¬val - ´æ´¢Ñ¡ÏîÖµµÄÖ¸Õë
-        // ·µ»Ø£º²Ù×÷½á¹û£¬0 ±íÊ¾³É¹¦
+        // è·å–æ—¶é—´å‹ç›‘å¬å™¨é€‰é¡¹
+        // å‚æ•°ï¼šopt - é€‰é¡¹åç§°ï¼Œval - å­˜å‚¨é€‰é¡¹å€¼çš„æŒ‡é’ˆ
+        // è¿”å›ï¼šæ“ä½œç»“æœï¼Œ0 è¡¨ç¤ºæˆåŠŸ
         int get_ms(std::string_view opt, nng_duration& val) const noexcept {
             return nng_listener_get_ms(_My_listener, opt.data(), &val);
         }
 
-        // »ñÈ¡ 64 Î»ÎŞ·ûºÅÕûĞÍ¼àÌıÆ÷Ñ¡Ïî
-        // ²ÎÊı£ºopt - Ñ¡ÏîÃû³Æ£¬val - ´æ´¢Ñ¡ÏîÖµµÄÖ¸Õë
-        // ·µ»Ø£º²Ù×÷½á¹û£¬0 ±íÊ¾³É¹¦
+        // è·å– 64 ä½æ— ç¬¦å·æ•´å‹ç›‘å¬å™¨é€‰é¡¹
+        // å‚æ•°ï¼šopt - é€‰é¡¹åç§°ï¼Œval - å­˜å‚¨é€‰é¡¹å€¼çš„æŒ‡é’ˆ
+        // è¿”å›ï¼šæ“ä½œç»“æœï¼Œ0 è¡¨ç¤ºæˆåŠŸ
         int get_uint64(std::string_view opt, uint64_t& val) const noexcept {
             return nng_listener_get_uint64(_My_listener, opt.data(), &val);
         }
 
-        // »ñÈ¡×Ö·û´®ĞÍ¼àÌıÆ÷Ñ¡Ïî
-        // ²ÎÊı£ºopt - Ñ¡ÏîÃû³Æ£¬val - ´æ´¢Ñ¡ÏîÖµµÄ×Ö·û´®
-        // ·µ»Ø£º²Ù×÷½á¹û£¬0 ±íÊ¾³É¹¦
+        // è·å–å­—ç¬¦ä¸²å‹ç›‘å¬å™¨é€‰é¡¹
+        // å‚æ•°ï¼šopt - é€‰é¡¹åç§°ï¼Œval - å­˜å‚¨é€‰é¡¹å€¼çš„å­—ç¬¦ä¸²
+        // è¿”å›ï¼šæ“ä½œç»“æœï¼Œ0 è¡¨ç¤ºæˆåŠŸ
         int get_string(std::string_view opt, std::string& val) const noexcept {
             char* out = nullptr;
             int rv = nng_listener_get_string(_My_listener, opt.data(), &out);
@@ -189,8 +189,8 @@ namespace nng
             return rv;
         }
 
-        // ×ª»»Îª nng_listener
-        // ·µ»Ø£ºµ±Ç°¹ÜÀíµÄ nng_listener
+        // è½¬æ¢ä¸º nng_listener
+        // è¿”å›ï¼šå½“å‰ç®¡ç†çš„ nng_listener
         operator nng_listener() const noexcept {
             return _My_listener;
         }

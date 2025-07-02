@@ -5,29 +5,29 @@
 
 namespace nng
 {
-    // Socket Àà£ºNNG Ì×½Ó×Ö£¨nng_socket£©µÄ C++ RAII °ü×°Àà
-    // ÓÃÍ¾£ºÌá¹©¶Ô NNG Ì×½Ó×ÖµÄ±ã½İ¹ÜÀí£¬Ö§³ÖÌ×½Ó×Ö´´½¨¡¢¹Ø±Õ¡¢ÏûÏ¢·¢ËÍ/½ÓÊÕ¡¢Ñ¡ÏîÅäÖÃ¼°ÌØ¶¨Ğ­Òé²Ù×÷
-    // ÌØĞÔ£º
-    // - Ê¹ÓÃ RAII ¹ÜÀí nng_socket ×ÊÔ´£¬È·±£×Ô¶¯ÊÍ·Å
-    // - Ö§³ÖÒÆ¶¯¹¹ÔìºÍÒÆ¶¯¸³Öµ£¬½ûÓÃ¿½±´ÒÔ±£Ö¤×ÊÔ´¶ÀÕ¼
-    // - Ìá¹©Á´Ê½µ÷ÓÃ½Ó¿ÚÒÔÉèÖÃÑ¡Ïî
-    // - Ìá¹©¾²Ì¬¹¤³§·½·¨ÒÔ´´½¨ÌØ¶¨Ğ­ÒéµÄÌ×½Ó×Ö£¨Èç req¡¢rep¡¢pub µÈ£©
-    // - Òì³£°²È«£ºÌ×½Ó×Ö´´½¨»ò²¿·Ö·¢ËÍ/½ÓÊÕ²Ù×÷Ê§°ÜÊ±Å×³ö Exception
+    // Socket ç±»ï¼šNNG å¥—æ¥å­—ï¼ˆnng_socketï¼‰çš„ C++ RAII åŒ…è£…ç±»
+    // ç”¨é€”ï¼šæä¾›å¯¹ NNG å¥—æ¥å­—çš„ä¾¿æ·ç®¡ç†ï¼Œæ”¯æŒå¥—æ¥å­—åˆ›å»ºã€å…³é—­ã€æ¶ˆæ¯å‘é€/æ¥æ”¶ã€é€‰é¡¹é…ç½®åŠç‰¹å®šåè®®æ“ä½œ
+    // ç‰¹æ€§ï¼š
+    // - ä½¿ç”¨ RAII ç®¡ç† nng_socket èµ„æºï¼Œç¡®ä¿è‡ªåŠ¨é‡Šæ”¾
+    // - æ”¯æŒç§»åŠ¨æ„é€ å’Œç§»åŠ¨èµ‹å€¼ï¼Œç¦ç”¨æ‹·è´ä»¥ä¿è¯èµ„æºç‹¬å 
+    // - æä¾›é“¾å¼è°ƒç”¨æ¥å£ä»¥è®¾ç½®é€‰é¡¹
+    // - æä¾›é™æ€å·¥å‚æ–¹æ³•ä»¥åˆ›å»ºç‰¹å®šåè®®çš„å¥—æ¥å­—ï¼ˆå¦‚ reqã€repã€pub ç­‰ï¼‰
+    // - å¼‚å¸¸å®‰å…¨ï¼šå¥—æ¥å­—åˆ›å»ºæˆ–éƒ¨åˆ†å‘é€/æ¥æ”¶æ“ä½œå¤±è´¥æ—¶æŠ›å‡º Exception
     class Socket {
     public:
         using _Socket_creator_t = int (*)(nng_socket*);
 
     public:
-        // Ä¬ÈÏ¹¹Ôìº¯Êı£º´´½¨Î´³õÊ¼»¯µÄÌ×½Ó×Ö
+        // é»˜è®¤æ„é€ å‡½æ•°ï¼šåˆ›å»ºæœªåˆå§‹åŒ–çš„å¥—æ¥å­—
         explicit Socket() noexcept = default;
 
-        // ¹¹Ôìº¯Êı£ºÊ¹ÓÃÏÖÓĞ nng_socket ³õÊ¼»¯Ì×½Ó×Ö
-        // ²ÎÊı£ºsocket - NNG Ì×½Ó×Ö
+        // æ„é€ å‡½æ•°ï¼šä½¿ç”¨ç°æœ‰ nng_socket åˆå§‹åŒ–å¥—æ¥å­—
+        // å‚æ•°ï¼šsocket - NNG å¥—æ¥å­—
         explicit Socket(nng_socket socket) noexcept : _My_socket(socket) {}
 
-        // ¹¹Ôìº¯Êı£ºÊ¹ÓÃÖ¸¶¨µÄ´´½¨º¯Êı³õÊ¼»¯Ì×½Ó×Ö
-        // ²ÎÊı£ºcreator - Ì×½Ó×Ö´´½¨º¯Êı
-        // Òì³££ºÈô´´½¨Ê§°Ü£¬Å×³ö Exception
+        // æ„é€ å‡½æ•°ï¼šä½¿ç”¨æŒ‡å®šçš„åˆ›å»ºå‡½æ•°åˆå§‹åŒ–å¥—æ¥å­—
+        // å‚æ•°ï¼šcreator - å¥—æ¥å­—åˆ›å»ºå‡½æ•°
+        // å¼‚å¸¸ï¼šè‹¥åˆ›å»ºå¤±è´¥ï¼ŒæŠ›å‡º Exception
         explicit Socket(_Socket_creator_t creator) noexcept(false) {
             auto rv = creator(&_My_socket);
             if (rv != NNG_OK) {
@@ -35,20 +35,20 @@ namespace nng
             }
         }
 
-        // Îö¹¹º¯Êı£º¹Ø±Õ²¢ÊÍ·ÅÌ×½Ó×Ö×ÊÔ´
+        // ææ„å‡½æ•°ï¼šå…³é—­å¹¶é‡Šæ”¾å¥—æ¥å­—èµ„æº
         virtual ~Socket() noexcept {
             close();
         }
 
-        // ÒÆ¶¯¹¹Ôìº¯Êı£º×ªÒÆÌ×½Ó×ÖËùÓĞÈ¨
-        // ²ÎÊı£ºother - Ô´ Socket ¶ÔÏó
+        // ç§»åŠ¨æ„é€ å‡½æ•°ï¼šè½¬ç§»å¥—æ¥å­—æ‰€æœ‰æƒ
+        // å‚æ•°ï¼šother - æº Socket å¯¹è±¡
         Socket(Socket&& other) noexcept : _My_socket(other._My_socket) {
             other._My_socket.id = 0;
         }
 
-        // ÒÆ¶¯¸³ÖµÔËËã·û£º×ªÒÆÌ×½Ó×ÖËùÓĞÈ¨
-        // ²ÎÊı£ºother - Ô´ Socket ¶ÔÏó
-        // ·µ»Ø£ºµ±Ç°¶ÔÏóµÄÒıÓÃ
+        // ç§»åŠ¨èµ‹å€¼è¿ç®—ç¬¦ï¼šè½¬ç§»å¥—æ¥å­—æ‰€æœ‰æƒ
+        // å‚æ•°ï¼šother - æº Socket å¯¹è±¡
+        // è¿”å›ï¼šå½“å‰å¯¹è±¡çš„å¼•ç”¨
         Socket& operator=(Socket&& other) noexcept {
             if (this != &other) {
                 close();
@@ -58,22 +58,22 @@ namespace nng
             return *this;
         }
 
-        // ½ûÓÃ¿½±´¹¹Ôìº¯Êı
+        // ç¦ç”¨æ‹·è´æ„é€ å‡½æ•°
         Socket(const Socket&) = delete;
 
-        // ½ûÓÃ¿½±´¸³ÖµÔËËã·û
+        // ç¦ç”¨æ‹·è´èµ‹å€¼è¿ç®—ç¬¦
         Socket& operator=(const Socket&) = delete;
 
-        // ´´½¨Ì×½Ó×Ö
-        // ²ÎÊı£ºcreator - Ì×½Ó×Ö´´½¨º¯Êı
-        // ·µ»Ø£º²Ù×÷½á¹û£¬0 ±íÊ¾³É¹¦
+        // åˆ›å»ºå¥—æ¥å­—
+        // å‚æ•°ï¼šcreator - å¥—æ¥å­—åˆ›å»ºå‡½æ•°
+        // è¿”å›ï¼šæ“ä½œç»“æœï¼Œ0 è¡¨ç¤ºæˆåŠŸ
         int create(_Socket_creator_t creator) noexcept {
             assert(creator);
             assert(_My_socket.id == 0);
             return creator(&_My_socket);
         }
 
-        // ¹Ø±ÕÌ×½Ó×Ö
+        // å…³é—­å¥—æ¥å­—
         void close() noexcept {
             if (valid()) {
                 nng_socket_close(_My_socket);
@@ -81,254 +81,254 @@ namespace nng
             }
         }
 
-        // ¼ì²éÌ×½Ó×ÖÊÇ·ñÓĞĞ§
-        // ·µ»Ø£ºtrue ±íÊ¾ÓĞĞ§£¬false ±íÊ¾ÎŞĞ§
+        // æ£€æŸ¥å¥—æ¥å­—æ˜¯å¦æœ‰æ•ˆ
+        // è¿”å›ï¼štrue è¡¨ç¤ºæœ‰æ•ˆï¼Œfalse è¡¨ç¤ºæ— æ•ˆ
         bool valid() const noexcept {
             return _My_socket.id != 0;
         }
 
-        // »ñÈ¡Ì×½Ó×Ö ID
-        // ·µ»Ø£ºÌ×½Ó×ÖµÄ ID
+        // è·å–å¥—æ¥å­— ID
+        // è¿”å›ï¼šå¥—æ¥å­—çš„ ID
         int id() const noexcept {
             return nng_socket_id(_My_socket);
         }
 
-        // ¾²Ì¬¹¤³§·½·¨£º´´½¨ req Ğ­ÒéÌ×½Ó×Ö
-        // ·µ»Ø£ºreq Ğ­ÒéµÄ Socket ¶ÔÏó
-        // Òì³££ºÈô´´½¨Ê§°Ü£¬Å×³ö Exception
+        // é™æ€å·¥å‚æ–¹æ³•ï¼šåˆ›å»º req åè®®å¥—æ¥å­—
+        // è¿”å›ï¼šreq åè®®çš„ Socket å¯¹è±¡
+        // å¼‚å¸¸ï¼šè‹¥åˆ›å»ºå¤±è´¥ï¼ŒæŠ›å‡º Exception
         static Socket req() noexcept(false) { return _Create(nng_req0_open); }
 
-        // ¾²Ì¬¹¤³§·½·¨£º´´½¨ rep Ğ­ÒéÌ×½Ó×Ö
-        // ·µ»Ø£ºrep Ğ­ÒéµÄ Socket ¶ÔÏó
-        // Òì³££ºÈô´´½¨Ê§°Ü£¬Å×³ö Exception
+        // é™æ€å·¥å‚æ–¹æ³•ï¼šåˆ›å»º rep åè®®å¥—æ¥å­—
+        // è¿”å›ï¼šrep åè®®çš„ Socket å¯¹è±¡
+        // å¼‚å¸¸ï¼šè‹¥åˆ›å»ºå¤±è´¥ï¼ŒæŠ›å‡º Exception
         static Socket rep() noexcept(false) { return _Create(nng_rep0_open); }
 
-        // ¾²Ì¬¹¤³§·½·¨£º´´½¨ pub Ğ­ÒéÌ×½Ó×Ö
-        // ·µ»Ø£ºpub Ğ­ÒéµÄ Socket ¶ÔÏó
-        // Òì³££ºÈô´´½¨Ê§°Ü£¬Å×³ö Exception
+        // é™æ€å·¥å‚æ–¹æ³•ï¼šåˆ›å»º pub åè®®å¥—æ¥å­—
+        // è¿”å›ï¼špub åè®®çš„ Socket å¯¹è±¡
+        // å¼‚å¸¸ï¼šè‹¥åˆ›å»ºå¤±è´¥ï¼ŒæŠ›å‡º Exception
         static Socket pub() noexcept(false) { return _Create(nng_pub0_open); }
 
-        // ¾²Ì¬¹¤³§·½·¨£º´´½¨ sub Ğ­ÒéÌ×½Ó×Ö
-        // ·µ»Ø£ºsub Ğ­ÒéµÄ Socket ¶ÔÏó
-        // Òì³££ºÈô´´½¨Ê§°Ü£¬Å×³ö Exception
+        // é™æ€å·¥å‚æ–¹æ³•ï¼šåˆ›å»º sub åè®®å¥—æ¥å­—
+        // è¿”å›ï¼šsub åè®®çš„ Socket å¯¹è±¡
+        // å¼‚å¸¸ï¼šè‹¥åˆ›å»ºå¤±è´¥ï¼ŒæŠ›å‡º Exception
         static Socket sub() noexcept(false) { return _Create(nng_sub0_open); }
 
-        // ¾²Ì¬¹¤³§·½·¨£º´´½¨ push Ğ­ÒéÌ×½Ó×Ö
-        // ·µ»Ø£ºpush Ğ­ÒéµÄ Socket ¶ÔÏó
-        // Òì³££ºÈô´´½¨Ê§°Ü£¬Å×³ö Exception
+        // é™æ€å·¥å‚æ–¹æ³•ï¼šåˆ›å»º push åè®®å¥—æ¥å­—
+        // è¿”å›ï¼špush åè®®çš„ Socket å¯¹è±¡
+        // å¼‚å¸¸ï¼šè‹¥åˆ›å»ºå¤±è´¥ï¼ŒæŠ›å‡º Exception
         static Socket push() noexcept(false) { return _Create(nng_push0_open); }
 
-        // ¾²Ì¬¹¤³§·½·¨£º´´½¨ pull Ğ­ÒéÌ×½Ó×Ö
-        // ·µ»Ø£ºpull Ğ­ÒéµÄ Socket ¶ÔÏó
-        // Òì³££ºÈô´´½¨Ê§°Ü£¬Å×³ö Exception
+        // é™æ€å·¥å‚æ–¹æ³•ï¼šåˆ›å»º pull åè®®å¥—æ¥å­—
+        // è¿”å›ï¼špull åè®®çš„ Socket å¯¹è±¡
+        // å¼‚å¸¸ï¼šè‹¥åˆ›å»ºå¤±è´¥ï¼ŒæŠ›å‡º Exception
         static Socket pull() noexcept(false) { return _Create(nng_pull0_open); }
 
-        // ¾²Ì¬¹¤³§·½·¨£º´´½¨ surveyor Ğ­ÒéÌ×½Ó×Ö
-        // ·µ»Ø£ºsurveyor Ğ­ÒéµÄ Socket ¶ÔÏó
-        // Òì³££ºÈô´´½¨Ê§°Ü£¬Å×³ö Exception
+        // é™æ€å·¥å‚æ–¹æ³•ï¼šåˆ›å»º surveyor åè®®å¥—æ¥å­—
+        // è¿”å›ï¼šsurveyor åè®®çš„ Socket å¯¹è±¡
+        // å¼‚å¸¸ï¼šè‹¥åˆ›å»ºå¤±è´¥ï¼ŒæŠ›å‡º Exception
         static Socket surveyor() noexcept(false) { return _Create(nng_surveyor0_open); }
 
-        // ¾²Ì¬¹¤³§·½·¨£º´´½¨ respondent Ğ­ÒéÌ×½Ó×Ö
-        // ·µ»Ø£ºrespondent Ğ­ÒéµÄ Socket ¶ÔÏó
-        // Òì³££ºÈô´´½¨Ê§°Ü£¬Å×³ö Exception
+        // é™æ€å·¥å‚æ–¹æ³•ï¼šåˆ›å»º respondent åè®®å¥—æ¥å­—
+        // è¿”å›ï¼šrespondent åè®®çš„ Socket å¯¹è±¡
+        // å¼‚å¸¸ï¼šè‹¥åˆ›å»ºå¤±è´¥ï¼ŒæŠ›å‡º Exception
         static Socket respond() noexcept(false) { return _Create(nng_respondent0_open); }
 
-        // ¾²Ì¬¹¤³§·½·¨£º´´½¨ bus Ğ­ÒéÌ×½Ó×Ö
-        // ·µ»Ø£ºbus Ğ­ÒéµÄ Socket ¶ÔÏó
-        // Òì³££ºÈô´´½¨Ê§°Ü£¬Å×³ö Exception
+        // é™æ€å·¥å‚æ–¹æ³•ï¼šåˆ›å»º bus åè®®å¥—æ¥å­—
+        // è¿”å›ï¼šbus åè®®çš„ Socket å¯¹è±¡
+        // å¼‚å¸¸ï¼šè‹¥åˆ›å»ºå¤±è´¥ï¼ŒæŠ›å‡º Exception
         static Socket bus() noexcept(false) { return _Create(nng_bus0_open); }
 
-        // ¾²Ì¬¹¤³§·½·¨£º´´½¨Ô­Ê¼Ä£Ê½µÄ req Ğ­ÒéÌ×½Ó×Ö
-        // ·µ»Ø£ºÔ­Ê¼Ä£Ê½µÄ req Ğ­Òé Socket ¶ÔÏó
-        // Òì³££ºÈô´´½¨Ê§°Ü£¬Å×³ö Exception
+        // é™æ€å·¥å‚æ–¹æ³•ï¼šåˆ›å»ºåŸå§‹æ¨¡å¼çš„ req åè®®å¥—æ¥å­—
+        // è¿”å›ï¼šåŸå§‹æ¨¡å¼çš„ req åè®® Socket å¯¹è±¡
+        // å¼‚å¸¸ï¼šè‹¥åˆ›å»ºå¤±è´¥ï¼ŒæŠ›å‡º Exception
         static Socket req_raw() noexcept(false) { return _Create(nng_req0_open_raw); }
 
-        // ¾²Ì¬¹¤³§·½·¨£º´´½¨Ô­Ê¼Ä£Ê½µÄ rep Ğ­ÒéÌ×½Ó×Ö
-        // ·µ»Ø£ºÔ­Ê¼Ä£Ê½µÄ rep Ğ­Òé Socket ¶ÔÏó
-        // Òì³££ºÈô´´½¨Ê§°Ü£¬Å×³ö Exception
+        // é™æ€å·¥å‚æ–¹æ³•ï¼šåˆ›å»ºåŸå§‹æ¨¡å¼çš„ rep åè®®å¥—æ¥å­—
+        // è¿”å›ï¼šåŸå§‹æ¨¡å¼çš„ rep åè®® Socket å¯¹è±¡
+        // å¼‚å¸¸ï¼šè‹¥åˆ›å»ºå¤±è´¥ï¼ŒæŠ›å‡º Exception
         static Socket rep_raw() noexcept(false) { return _Create(nng_rep0_open_raw); }
 
-        // ¾²Ì¬¹¤³§·½·¨£º´´½¨Ô­Ê¼Ä£Ê½µÄ pub Ğ­ÒéÌ×½Ó×Ö
-        // ·µ»Ø£ºÔ­Ê¼Ä£Ê½µÄ pub Ğ­Òé Socket ¶ÔÏó
-        // Òì³££ºÈô´´½¨Ê§°Ü£¬Å×³ö Exception
+        // é™æ€å·¥å‚æ–¹æ³•ï¼šåˆ›å»ºåŸå§‹æ¨¡å¼çš„ pub åè®®å¥—æ¥å­—
+        // è¿”å›ï¼šåŸå§‹æ¨¡å¼çš„ pub åè®® Socket å¯¹è±¡
+        // å¼‚å¸¸ï¼šè‹¥åˆ›å»ºå¤±è´¥ï¼ŒæŠ›å‡º Exception
         static Socket pub_raw() noexcept(false) { return _Create(nng_pub0_open_raw); }
 
-        // ¾²Ì¬¹¤³§·½·¨£º´´½¨Ô­Ê¼Ä£Ê½µÄ sub Ğ­ÒéÌ×½Ó×Ö
-        // ·µ»Ø£ºÔ­Ê¼Ä£Ê½µÄ sub Ğ­Òé Socket ¶ÔÏó
-        // Òì³££ºÈô´´½¨Ê§°Ü£¬Å×³ö Exception
+        // é™æ€å·¥å‚æ–¹æ³•ï¼šåˆ›å»ºåŸå§‹æ¨¡å¼çš„ sub åè®®å¥—æ¥å­—
+        // è¿”å›ï¼šåŸå§‹æ¨¡å¼çš„ sub åè®® Socket å¯¹è±¡
+        // å¼‚å¸¸ï¼šè‹¥åˆ›å»ºå¤±è´¥ï¼ŒæŠ›å‡º Exception
         static Socket sub_raw() noexcept(false) { return _Create(nng_sub0_open_raw); }
 
-        // 	static¹¤³§·½·¨£º´´½¨Ô­Ê¼Ä£Ê½µÄ push Ğ­ÒéÌ×½Ó×Ö
-        // 	·µ»Ø£ºÔ­Ê¼Ä£Ê½µÄ push Ğ­Òé Socket ¶ÔÏó
-        // 	Òì³££ºÈô´´½¨Ê§°Ü£¬Å×³ö Exception
+        // 	staticå·¥å‚æ–¹æ³•ï¼šåˆ›å»ºåŸå§‹æ¨¡å¼çš„ push åè®®å¥—æ¥å­—
+        // 	è¿”å›ï¼šåŸå§‹æ¨¡å¼çš„ push åè®® Socket å¯¹è±¡
+        // 	å¼‚å¸¸ï¼šè‹¥åˆ›å»ºå¤±è´¥ï¼ŒæŠ›å‡º Exception
         static Socket push_raw() noexcept(false) { return _Create(nng_push0_open_raw); }
 
-        // ¾²Ì¬¹¤³§·½·¨£º´´½¨Ô­Ê¼Ä£Ê½µÄ pull Ğ­ÒéÌ×½Ó×Ö
-        // ·µ»Ø£ºÔ­Ê¼Ä£Ê½µÄ pull Ğ­Òé Socket ¶ÔÏó
-        // Òì³££ºÈô´´½¨Ê§°Ü£¬Å×³ö Exception
+        // é™æ€å·¥å‚æ–¹æ³•ï¼šåˆ›å»ºåŸå§‹æ¨¡å¼çš„ pull åè®®å¥—æ¥å­—
+        // è¿”å›ï¼šåŸå§‹æ¨¡å¼çš„ pull åè®® Socket å¯¹è±¡
+        // å¼‚å¸¸ï¼šè‹¥åˆ›å»ºå¤±è´¥ï¼ŒæŠ›å‡º Exception
         static Socket pull_raw() noexcept(false) { return _Create(nng_pull0_open_raw); }
 
-        // ¾²Ì¬¹¤³§·½·¨£º´´½¨Ô­Ê¼Ä£Ê½µÄ surveyor Ğ­ÒéÌ×½Ó×Ö
-        // ·µ»Ø£ºÔ­Ê¼Ä£Ê½µÄ surveyor Ğ­Òé Socket ¶ÔÏó
-        // Òì³££ºÈô´´½¨Ê§°Ü£¬Å×³ö Exception
+        // é™æ€å·¥å‚æ–¹æ³•ï¼šåˆ›å»ºåŸå§‹æ¨¡å¼çš„ surveyor åè®®å¥—æ¥å­—
+        // è¿”å›ï¼šåŸå§‹æ¨¡å¼çš„ surveyor åè®® Socket å¯¹è±¡
+        // å¼‚å¸¸ï¼šè‹¥åˆ›å»ºå¤±è´¥ï¼ŒæŠ›å‡º Exception
         static Socket surveyor_raw() noexcept(false) { return _Create(nng_surveyor0_open_raw); }
 
-        // ¾²Ì¬¹¤³§·½·¨£º´´½¨Ô­Ê¼Ä£Ê½µÄ respondent Ğ­ÒéÌ×½Ó×Ö
-        // ·µ»Ø£ºÔ­Ê¼Ä£Ê½µÄ respondent Ğ­Òé Socket ¶ÔÏó
-        // Òì³££ºÈô´´½¨Ê§°Ü£¬Å×³ö Exception
+        // é™æ€å·¥å‚æ–¹æ³•ï¼šåˆ›å»ºåŸå§‹æ¨¡å¼çš„ respondent åè®®å¥—æ¥å­—
+        // è¿”å›ï¼šåŸå§‹æ¨¡å¼çš„ respondent åè®® Socket å¯¹è±¡
+        // å¼‚å¸¸ï¼šè‹¥åˆ›å»ºå¤±è´¥ï¼ŒæŠ›å‡º Exception
         static Socket respond_raw() noexcept(false) { return _Create(nng_respondent0_open_raw); }
 
-        // ¾²Ì¬¹¤³§·½·¨£º´´½¨Ô­Ê¼Ä£Ê½µÄ bus Ğ­ÒéÌ×½Ó×Ö
-        // ·µ»Ø£ºÔ­Ê¼Ä£Ê½µÄ bus Ğ­Òé Socket ¶ÔÏó
-        // Òì³££ºÈô´´½¨Ê§°Ü£¬Å×³ö Exception
+        // é™æ€å·¥å‚æ–¹æ³•ï¼šåˆ›å»ºåŸå§‹æ¨¡å¼çš„ bus åè®®å¥—æ¥å­—
+        // è¿”å›ï¼šåŸå§‹æ¨¡å¼çš„ bus åè®® Socket å¯¹è±¡
+        // å¼‚å¸¸ï¼šè‹¥åˆ›å»ºå¤±è´¥ï¼ŒæŠ›å‡º Exception
         static Socket bus_raw() noexcept(false) { return _Create(nng_bus0_open_raw); }
 
-        // ÉèÖÃ²¼¶ûĞÍÌ×½Ó×ÖÑ¡Ïî
-        // ²ÎÊı£ºopt - Ñ¡ÏîÃû³Æ£¬val - Ñ¡ÏîÖµ
-        // ·µ»Ø£ºµ±Ç°¶ÔÏóµÄÒıÓÃ£¨Ö§³ÖÁ´Ê½µ÷ÓÃ£©
+        // è®¾ç½®å¸ƒå°”å‹å¥—æ¥å­—é€‰é¡¹
+        // å‚æ•°ï¼šopt - é€‰é¡¹åç§°ï¼Œval - é€‰é¡¹å€¼
+        // è¿”å›ï¼šå½“å‰å¯¹è±¡çš„å¼•ç”¨ï¼ˆæ”¯æŒé“¾å¼è°ƒç”¨ï¼‰
         Socket& set_bool(std::string_view opt, bool val) noexcept {
             nng_socket_set_bool(_My_socket, opt.data(), val);
             return *this;
         }
 
-        // ÉèÖÃÕûĞÍÌ×½Ó×ÖÑ¡Ïî
-        // ²ÎÊı£ºopt - Ñ¡ÏîÃû³Æ£¬val - Ñ¡ÏîÖµ
-        // ·µ»Ø£ºµ±Ç°¶ÔÏóµÄÒıÓÃ£¨Ö§³ÖÁ´Ê½µ÷ÓÃ£©
+        // è®¾ç½®æ•´å‹å¥—æ¥å­—é€‰é¡¹
+        // å‚æ•°ï¼šopt - é€‰é¡¹åç§°ï¼Œval - é€‰é¡¹å€¼
+        // è¿”å›ï¼šå½“å‰å¯¹è±¡çš„å¼•ç”¨ï¼ˆæ”¯æŒé“¾å¼è°ƒç”¨ï¼‰
         Socket& set_int(std::string_view opt, int val) noexcept {
             nng_socket_set_int(_My_socket, opt.data(), val);
             return *this;
         }
 
-        // ÉèÖÃ´óĞ¡ĞÍÌ×½Ó×ÖÑ¡Ïî
-        // ²ÎÊı£ºopt - Ñ¡ÏîÃû³Æ£¬val - Ñ¡ÏîÖµ
-        // ·µ»Ø£ºµ±Ç°¶ÔÏóµÄÒıÓÃ£¨Ö§³ÖÁ´Ê½µ÷ÓÃ£©
+        // è®¾ç½®å¤§å°å‹å¥—æ¥å­—é€‰é¡¹
+        // å‚æ•°ï¼šopt - é€‰é¡¹åç§°ï¼Œval - é€‰é¡¹å€¼
+        // è¿”å›ï¼šå½“å‰å¯¹è±¡çš„å¼•ç”¨ï¼ˆæ”¯æŒé“¾å¼è°ƒç”¨ï¼‰
         Socket& set_size(std::string_view opt, size_t val) noexcept {
             nng_socket_set_size(_My_socket, opt.data(), val);
             return *this;
         }
 
-        // ÉèÖÃÊ±¼äĞÍÌ×½Ó×ÖÑ¡Ïî
-        // ²ÎÊı£ºopt - Ñ¡ÏîÃû³Æ£¬val - Ñ¡ÏîÖµ£¨ºÁÃë£©
-        // ·µ»Ø£ºµ±Ç°¶ÔÏóµÄÒıÓÃ£¨Ö§³ÖÁ´Ê½µ÷ÓÃ£©
+        // è®¾ç½®æ—¶é—´å‹å¥—æ¥å­—é€‰é¡¹
+        // å‚æ•°ï¼šopt - é€‰é¡¹åç§°ï¼Œval - é€‰é¡¹å€¼ï¼ˆæ¯«ç§’ï¼‰
+        // è¿”å›ï¼šå½“å‰å¯¹è±¡çš„å¼•ç”¨ï¼ˆæ”¯æŒé“¾å¼è°ƒç”¨ï¼‰
         Socket& set_ms(std::string_view opt, nng_duration val) noexcept {
             nng_socket_set_ms(_My_socket, opt.data(), val);
             return *this;
         }
 
-        // »ñÈ¡²¼¶ûĞÍÌ×½Ó×ÖÑ¡Ïî
-        // ²ÎÊı£ºopt - Ñ¡ÏîÃû³Æ£¬val - ´æ´¢Ñ¡ÏîÖµµÄÖ¸Õë
-        // ·µ»Ø£º²Ù×÷½á¹û£¬0 ±íÊ¾³É¹¦
+        // è·å–å¸ƒå°”å‹å¥—æ¥å­—é€‰é¡¹
+        // å‚æ•°ï¼šopt - é€‰é¡¹åç§°ï¼Œval - å­˜å‚¨é€‰é¡¹å€¼çš„æŒ‡é’ˆ
+        // è¿”å›ï¼šæ“ä½œç»“æœï¼Œ0 è¡¨ç¤ºæˆåŠŸ
         int get_bool(std::string_view opt, bool& val) const noexcept {
             return nng_socket_get_bool(_My_socket, opt.data(), &val);
         }
 
-        // »ñÈ¡ÕûĞÍÌ×½Ó×ÖÑ¡Ïî
-        // ²ÎÊı£ºopt - Ñ¡ÏîÃû³Æ£¬val - ´æ´¢Ñ¡ÏîÖµµÄÖ¸Õë
-        // ·µ»Ø£º²Ù×÷½á¹û£¬0 ±íÊ¾³É¹¦
+        // è·å–æ•´å‹å¥—æ¥å­—é€‰é¡¹
+        // å‚æ•°ï¼šopt - é€‰é¡¹åç§°ï¼Œval - å­˜å‚¨é€‰é¡¹å€¼çš„æŒ‡é’ˆ
+        // è¿”å›ï¼šæ“ä½œç»“æœï¼Œ0 è¡¨ç¤ºæˆåŠŸ
         int get_int(std::string_view opt, int& val) const noexcept {
             return nng_socket_get_int(_My_socket, opt.data(), &val);
         }
 
-        // »ñÈ¡´óĞ¡ĞÍÌ×½Ó×ÖÑ¡Ïî
-        // ²ÎÊı£ºopt - Ñ¡ÏîÃû³Æ£¬val - ´æ´¢Ñ¡ÏîÖµµÄÖ¸Õë
-        // ·µ»Ø£º²Ù×÷½á¹û£¬0 ±íÊ¾³É¹¦
+        // è·å–å¤§å°å‹å¥—æ¥å­—é€‰é¡¹
+        // å‚æ•°ï¼šopt - é€‰é¡¹åç§°ï¼Œval - å­˜å‚¨é€‰é¡¹å€¼çš„æŒ‡é’ˆ
+        // è¿”å›ï¼šæ“ä½œç»“æœï¼Œ0 è¡¨ç¤ºæˆåŠŸ
         int get_size(std::string_view opt, size_t& val) const noexcept {
             return nng_socket_get_size(_My_socket, opt.data(), &val);
         }
 
-        // »ñÈ¡Ê±¼äĞÍÌ×½Ó×ÖÑ¡Ïî
-        // ²ÎÊı£ºopt - Ñ¡ÏîÃû³Æ£¬val - ´æ´¢Ñ¡ÏîÖµµÄÖ¸Õë
-        // ·µ»Ø£º²Ù×÷½á¹û£¬0 ±íÊ¾³É¹¦
+        // è·å–æ—¶é—´å‹å¥—æ¥å­—é€‰é¡¹
+        // å‚æ•°ï¼šopt - é€‰é¡¹åç§°ï¼Œval - å­˜å‚¨é€‰é¡¹å€¼çš„æŒ‡é’ˆ
+        // è¿”å›ï¼šæ“ä½œç»“æœï¼Œ0 è¡¨ç¤ºæˆåŠŸ
         int get_ms(std::string_view opt, nng_duration& val) const noexcept {
             return nng_socket_get_ms(_My_socket, opt.data(), &val);
         }
 
-        // »ñÈ¡Ğ­Òé ID
-        // ²ÎÊı£ºid - ´æ´¢Ğ­Òé ID µÄÖ¸Õë
-        // ·µ»Ø£º²Ù×÷½á¹û£¬0 ±íÊ¾³É¹¦
+        // è·å–åè®® ID
+        // å‚æ•°ï¼šid - å­˜å‚¨åè®® ID çš„æŒ‡é’ˆ
+        // è¿”å›ï¼šæ“ä½œç»“æœï¼Œ0 è¡¨ç¤ºæˆåŠŸ
         int get_proto_id(uint16_t& id) const noexcept {
             return nng_socket_proto_id(_My_socket, &id);
         }
 
-        // »ñÈ¡¶Ô¶ËĞ­Òé ID
-        // ²ÎÊı£ºid - ´æ´¢¶Ô¶ËĞ­Òé ID µÄÖ¸Õë
-        // ·µ»Ø£º²Ù×÷½á¹û£¬0 ±íÊ¾³É¹¦
+        // è·å–å¯¹ç«¯åè®® ID
+        // å‚æ•°ï¼šid - å­˜å‚¨å¯¹ç«¯åè®® ID çš„æŒ‡é’ˆ
+        // è¿”å›ï¼šæ“ä½œç»“æœï¼Œ0 è¡¨ç¤ºæˆåŠŸ
         int get_peer_id(uint16_t& id) const noexcept {
             return nng_socket_peer_id(_My_socket, &id);
         }
 
-        // »ñÈ¡Ğ­ÒéÃû³Æ
-        // ²ÎÊı£ºname - ´æ´¢Ğ­ÒéÃû³ÆµÄÖ¸Õë
-        // ·µ»Ø£º²Ù×÷½á¹û£¬0 ±íÊ¾³É¹¦
+        // è·å–åè®®åç§°
+        // å‚æ•°ï¼šname - å­˜å‚¨åè®®åç§°çš„æŒ‡é’ˆ
+        // è¿”å›ï¼šæ“ä½œç»“æœï¼Œ0 è¡¨ç¤ºæˆåŠŸ
         int get_proto_name(const char** name) const noexcept {
             return nng_socket_proto_name(_My_socket, name);
         }
 
-        // »ñÈ¡¶Ô¶ËĞ­ÒéÃû³Æ
-        // ²ÎÊı£ºname - ´æ´¢¶Ô¶ËĞ­ÒéÃû³ÆµÄÖ¸Õë
-        // ·µ»Ø£º²Ù×÷½á¹û£¬0 ±íÊ¾³É¹¦
+        // è·å–å¯¹ç«¯åè®®åç§°
+        // å‚æ•°ï¼šname - å­˜å‚¨å¯¹ç«¯åè®®åç§°çš„æŒ‡é’ˆ
+        // è¿”å›ï¼šæ“ä½œç»“æœï¼Œ0 è¡¨ç¤ºæˆåŠŸ
         int get_peer_name(const char** name) const noexcept {
             return nng_socket_peer_name(_My_socket, name);
         }
 
-        // »ñÈ¡Ì×½Ó×ÖÊÇ·ñÎªÔ­Ê¼Ä£Ê½
-        // ²ÎÊı£ºraw - ´æ´¢Ô­Ê¼Ä£Ê½±êÖ¾µÄÖ¸Õë
-        // ·µ»Ø£º²Ù×÷½á¹û£¬0 ±íÊ¾³É¹¦
+        // è·å–å¥—æ¥å­—æ˜¯å¦ä¸ºåŸå§‹æ¨¡å¼
+        // å‚æ•°ï¼šraw - å­˜å‚¨åŸå§‹æ¨¡å¼æ ‡å¿—çš„æŒ‡é’ˆ
+        // è¿”å›ï¼šæ“ä½œç»“æœï¼Œ0 è¡¨ç¤ºæˆåŠŸ
         int get_raw(bool& raw) const noexcept {
             return nng_socket_raw(_My_socket, &raw);
         }
 
-        // ¸ñÊ½»¯Ì×½Ó×ÖµØÖ·
-        // ²ÎÊı£ºsa - Ì×½Ó×ÖµØÖ·£¬buf - ´æ´¢¸ñÊ½»¯½á¹ûµÄ»º³åÇø£¬bufsz - »º³åÇø´óĞ¡
-        // ·µ»Ø£º¸ñÊ½»¯ºóµÄµØÖ·×Ö·û´®
+        // æ ¼å¼åŒ–å¥—æ¥å­—åœ°å€
+        // å‚æ•°ï¼šsa - å¥—æ¥å­—åœ°å€ï¼Œbuf - å­˜å‚¨æ ¼å¼åŒ–ç»“æœçš„ç¼“å†²åŒºï¼Œbufsz - ç¼“å†²åŒºå¤§å°
+        // è¿”å›ï¼šæ ¼å¼åŒ–åçš„åœ°å€å­—ç¬¦ä¸²
         static const char* format_sockaddr(const nng_sockaddr& sa, char* buf, size_t bufsz) noexcept {
             return nng_str_sockaddr(&sa, buf, bufsz);
         }
 
-        // SUB0 Ğ­Òé£º¶©ÔÄÖ¸¶¨Ö÷Ìâ
-        // ²ÎÊı£ºsv - Ö÷Ìâ×Ö·û´®£¬Ä¬ÈÏÎª¿Õ
-        // ·µ»Ø£º²Ù×÷½á¹û£¬0 ±íÊ¾³É¹¦
+        // SUB0 åè®®ï¼šè®¢é˜…æŒ‡å®šä¸»é¢˜
+        // å‚æ•°ï¼šsv - ä¸»é¢˜å­—ç¬¦ä¸²ï¼Œé»˜è®¤ä¸ºç©º
+        // è¿”å›ï¼šæ“ä½œç»“æœï¼Œ0 è¡¨ç¤ºæˆåŠŸ
         int socket_subscribe(std::string_view sv = "") noexcept {
             return nng_sub0_socket_subscribe(_My_socket, sv.data(), sv.length());
         }
 
-        // SUB0 Ğ­Òé£ºÈ¡Ïû¶©ÔÄÖ¸¶¨Ö÷Ìâ
-        // ²ÎÊı£ºsv - Ö÷Ìâ×Ö·û´®£¬Ä¬ÈÏÎª¿Õ
-        // ·µ»Ø£º²Ù×÷½á¹û£¬0 ±íÊ¾³É¹¦
+        // SUB0 åè®®ï¼šå–æ¶ˆè®¢é˜…æŒ‡å®šä¸»é¢˜
+        // å‚æ•°ï¼šsv - ä¸»é¢˜å­—ç¬¦ä¸²ï¼Œé»˜è®¤ä¸ºç©º
+        // è¿”å›ï¼šæ“ä½œç»“æœï¼Œ0 è¡¨ç¤ºæˆåŠŸ
         int socket_unsubscribe(std::string_view sv = "") noexcept {
             return nng_sub0_socket_unsubscribe(_My_socket, sv.data(), sv.length());
         }
 
-        // Òì²½·¢ËÍÏûÏ¢
-        // ²ÎÊı£ºaio - Òì²½ I/O ¶ÔÏó
+        // å¼‚æ­¥å‘é€æ¶ˆæ¯
+        // å‚æ•°ï¼šaio - å¼‚æ­¥ I/O å¯¹è±¡
         void send(nng_aio* aio) noexcept {
             nng_send_aio(_My_socket, aio);
         }
 
-        // Òì²½½ÓÊÕÏûÏ¢
-        // ²ÎÊı£ºaio - Òì²½ I/O ¶ÔÏó
+        // å¼‚æ­¥æ¥æ”¶æ¶ˆæ¯
+        // å‚æ•°ï¼šaio - å¼‚æ­¥ I/O å¯¹è±¡
         void recv(nng_aio* aio) noexcept {
             nng_recv_aio(_My_socket, aio);
         }
 
-        // Í¬²½·¢ËÍÊı¾İ
-        // ²ÎÊı£ºdata - Êı¾İÖ¸Õë£¬data_size - Êı¾İ´óĞ¡
-        // ·µ»Ø£º²Ù×÷½á¹û£¬0 ±íÊ¾³É¹¦
+        // åŒæ­¥å‘é€æ•°æ®
+        // å‚æ•°ï¼šdata - æ•°æ®æŒ‡é’ˆï¼Œdata_size - æ•°æ®å¤§å°
+        // è¿”å›ï¼šæ“ä½œç»“æœï¼Œ0 è¡¨ç¤ºæˆåŠŸ
         int send(const void* data, size_t data_size) noexcept {
             return nng_send(_My_socket, (void*)data, data_size, 0);
         }
 
-        // Í¬²½·¢ËÍ I/O ÏòÁ¿Êı¾İ
-        // ²ÎÊı£ºiov - I/O ÏòÁ¿
-        // ·µ»Ø£º²Ù×÷½á¹û£¬0 ±íÊ¾³É¹¦
+        // åŒæ­¥å‘é€ I/O å‘é‡æ•°æ®
+        // å‚æ•°ï¼šiov - I/O å‘é‡
+        // è¿”å›ï¼šæ“ä½œç»“æœï¼Œ0 è¡¨ç¤ºæˆåŠŸ
         int send(const nng_iov& iov) noexcept {
             return nng_send(_My_socket, iov.iov_buf, iov.iov_len, 0);
         }
 
-        // ·¢ËÍÏûÏ¢²¢½ÓÊÕ·µ»Ø½á¹û
-        // ²ÎÊı£ºcode - ÏûÏ¢´úÂë£¬msg - ÏûÏ¢¶ÔÏó
-        // ·µ»Ø£ºÏûÏ¢½á¹û
-        // Òì³££ºÈôÏûÏ¢ÖØ·ÖÅä»ò·¢ËÍÊ§°Ü£¬Å×³ö Exception
+        // å‘é€æ¶ˆæ¯å¹¶æ¥æ”¶è¿”å›ç»“æœ
+        // å‚æ•°ï¼šcode - æ¶ˆæ¯ä»£ç ï¼Œmsg - æ¶ˆæ¯å¯¹è±¡
+        // è¿”å›ï¼šæ¶ˆæ¯ç»“æœ
+        // å¼‚å¸¸ï¼šè‹¥æ¶ˆæ¯é‡åˆ†é…æˆ–å‘é€å¤±è´¥ï¼ŒæŠ›å‡º Exception
         Msg::_Ty_msg_result send(Msg::_Ty_msg_code code, Msg& msg) noexcept(false) {
             int rv;
             if (!msg) {
@@ -350,9 +350,9 @@ namespace nng
             return Msg::_Chop_msg_result(msg);
         }
 
-        // ·¢ËÍÏûÏ¢²¢½ÓÊÕ·µ»ØÏûÏ¢
-        // ²ÎÊı£ºmsg - ÏûÏ¢¶ÔÏó
-        // ·µ»Ø£º²Ù×÷½á¹û£¬0 ±íÊ¾³É¹¦
+        // å‘é€æ¶ˆæ¯å¹¶æ¥æ”¶è¿”å›æ¶ˆæ¯
+        // å‚æ•°ï¼šmsg - æ¶ˆæ¯å¯¹è±¡
+        // è¿”å›ï¼šæ“ä½œç»“æœï¼Œ0 è¡¨ç¤ºæˆåŠŸ
         int send(Msg& msg) noexcept {
             int rv;
             if (!msg) {
@@ -370,10 +370,10 @@ namespace nng
             return recv(msg);
         }
 
-        // ·¢ËÍÏûÏ¢£¨²»½ÓÊÕ·µ»Ø£©
-        // ²ÎÊı£ºmsg - ÏûÏ¢¶ÔÏó
-        // ·µ»Ø£º²Ù×÷½á¹û£¬0 ±íÊ¾³É¹¦
-        // ×¢Òâ£ºÈô·¢ËÍ³É¹¦£¬msg µÄ×ÊÔ´»á±»ÊÍ·Å
+        // å‘é€æ¶ˆæ¯ï¼ˆä¸æ¥æ”¶è¿”å›ï¼‰
+        // å‚æ•°ï¼šmsg - æ¶ˆæ¯å¯¹è±¡
+        // è¿”å›ï¼šæ“ä½œç»“æœï¼Œ0 è¡¨ç¤ºæˆåŠŸ
+        // æ³¨æ„ï¼šè‹¥å‘é€æˆåŠŸï¼Œmsg çš„èµ„æºä¼šè¢«é‡Šæ”¾
         int send(Msg&& msg) noexcept {
             int rv = nng_sendmsg(_My_socket, msg, 0);
             if (rv == NNG_OK) {
@@ -382,10 +382,10 @@ namespace nng
             return rv;
         }
 
-        // ·¢ËÍ´øÏûÏ¢´úÂëµÄÏûÏ¢£¨²»½ÓÊÕ·µ»Ø£©
-        // ²ÎÊı£ºcode - ÏûÏ¢´úÂë£¬msg - ÏûÏ¢¶ÔÏó£¨Ä¬ÈÏÎª¿Õ£©
-        // ·µ»Ø£º²Ù×÷½á¹û£¬0 ±íÊ¾³É¹¦
-        // ×¢Òâ£ºÈô·¢ËÍ³É¹¦£¬msg µÄ×ÊÔ´»á±»ÊÍ·Å
+        // å‘é€å¸¦æ¶ˆæ¯ä»£ç çš„æ¶ˆæ¯ï¼ˆä¸æ¥æ”¶è¿”å›ï¼‰
+        // å‚æ•°ï¼šcode - æ¶ˆæ¯ä»£ç ï¼Œmsg - æ¶ˆæ¯å¯¹è±¡ï¼ˆé»˜è®¤ä¸ºç©ºï¼‰
+        // è¿”å›ï¼šæ“ä½œç»“æœï¼Œ0 è¡¨ç¤ºæˆåŠŸ
+        // æ³¨æ„ï¼šè‹¥å‘é€æˆåŠŸï¼Œmsg çš„èµ„æºä¼šè¢«é‡Šæ”¾
         int send(Msg::_Ty_msg_code code, Msg&& msg = Msg{}) noexcept {
             int rv;
             if (!msg) {
@@ -405,31 +405,31 @@ namespace nng
             return rv;
         }
 
-        // ·¢ËÍÔ­Ê¼ÏûÏ¢
-        // ²ÎÊı£ºmsg - Ô­Ê¼ÏûÏ¢Ö¸Õë
-        // ·µ»Ø£º²Ù×÷½á¹û£¬0 ±íÊ¾³É¹¦
+        // å‘é€åŸå§‹æ¶ˆæ¯
+        // å‚æ•°ï¼šmsg - åŸå§‹æ¶ˆæ¯æŒ‡é’ˆ
+        // è¿”å›ï¼šæ“ä½œç»“æœï¼Œ0 è¡¨ç¤ºæˆåŠŸ
         int send(nng_msg* msg) noexcept {
             return nng_sendmsg(_My_socket, msg, 0);
         }
 
-        // Í¬²½½ÓÊÕÊı¾İ
-        // ²ÎÊı£ºdata - Êı¾İ»º³åÇø£¬size - Êı¾İ´óĞ¡Ö¸Õë£¬flags - ½ÓÊÕ±êÖ¾
-        // ·µ»Ø£º²Ù×÷½á¹û£¬0 ±íÊ¾³É¹¦
+        // åŒæ­¥æ¥æ”¶æ•°æ®
+        // å‚æ•°ï¼šdata - æ•°æ®ç¼“å†²åŒºï¼Œsize - æ•°æ®å¤§å°æŒ‡é’ˆï¼Œflags - æ¥æ”¶æ ‡å¿—
+        // è¿”å›ï¼šæ“ä½œç»“æœï¼Œ0 è¡¨ç¤ºæˆåŠŸ
         int recv(void* data, size_t* size, int flags) noexcept {
             return nng_recv(_My_socket, data, size, flags);
         }
 
-        // Í¬²½½ÓÊÕÔ­Ê¼ÏûÏ¢
-        // ²ÎÊı£ºmsg - ´æ´¢ÏûÏ¢µÄÖ¸Õë£¬flags - ½ÓÊÕ±êÖ¾£¬Ä¬ÈÏÎª 0
-        // ·µ»Ø£º²Ù×÷½á¹û£¬0 ±íÊ¾³É¹¦
+        // åŒæ­¥æ¥æ”¶åŸå§‹æ¶ˆæ¯
+        // å‚æ•°ï¼šmsg - å­˜å‚¨æ¶ˆæ¯çš„æŒ‡é’ˆï¼Œflags - æ¥æ”¶æ ‡å¿—ï¼Œé»˜è®¤ä¸º 0
+        // è¿”å›ï¼šæ“ä½œç»“æœï¼Œ0 è¡¨ç¤ºæˆåŠŸ
         int recv(nng_msg** msg, int flags = 0) noexcept {
             return nng_recvmsg(_My_socket, msg, flags);
         }
 
-        // Í¬²½½ÓÊÕÏûÏ¢
-        // ²ÎÊı£ºflags - ½ÓÊÕ±êÖ¾£¬Ä¬ÈÏÎª 0
-        // ·µ»Ø£º½ÓÊÕµ½µÄ Msg ¶ÔÏó
-        // Òì³££ºÈô½ÓÊÕÊ§°Ü£¬Å×³ö Exception
+        // åŒæ­¥æ¥æ”¶æ¶ˆæ¯
+        // å‚æ•°ï¼šflags - æ¥æ”¶æ ‡å¿—ï¼Œé»˜è®¤ä¸º 0
+        // è¿”å›ï¼šæ¥æ”¶åˆ°çš„ Msg å¯¹è±¡
+        // å¼‚å¸¸ï¼šè‹¥æ¥æ”¶å¤±è´¥ï¼ŒæŠ›å‡º Exception
         Msg recv(int flags = 0) noexcept(false) {
             nng_msg* msg = nullptr;
             int rv = nng_recvmsg(_My_socket, &msg, flags);
@@ -440,9 +440,9 @@ namespace nng
             return Msg(msg);
         }
 
-        // Í¬²½½ÓÊÕÏûÏ¢µ½Ö¸¶¨¶ÔÏó
-        // ²ÎÊı£ºmsg - ´æ´¢½ÓÊÕÏûÏ¢µÄ Msg ¶ÔÏó
-        // ·µ»Ø£º²Ù×÷½á¹û£¬0 ±íÊ¾³É¹¦
+        // åŒæ­¥æ¥æ”¶æ¶ˆæ¯åˆ°æŒ‡å®šå¯¹è±¡
+        // å‚æ•°ï¼šmsg - å­˜å‚¨æ¥æ”¶æ¶ˆæ¯çš„ Msg å¯¹è±¡
+        // è¿”å›ï¼šæ“ä½œç»“æœï¼Œ0 è¡¨ç¤ºæˆåŠŸ
         int recv(Msg& msg) noexcept {
             nng_msg* m = nullptr;
             int rv = nng_recvmsg(_My_socket, &m, 0);
@@ -454,17 +454,17 @@ namespace nng
             return rv;
         }
 
-        // ×ª»»Îª nng_socket
-        // ·µ»Ø£ºµ±Ç°¹ÜÀíµÄ nng_socket
+        // è½¬æ¢ä¸º nng_socket
+        // è¿”å›ï¼šå½“å‰ç®¡ç†çš„ nng_socket
         operator nng_socket() const noexcept {
             return _My_socket;
         }
 
     private:
-        // ¾²Ì¬´´½¨·½·¨£º´´½¨Ö¸¶¨Ğ­ÒéµÄÌ×½Ó×Ö
-        // ²ÎÊı£ºcreator - Ì×½Ó×Ö´´½¨º¯Êı
-        // ·µ»Ø£º´´½¨µÄ Socket ¶ÔÏó
-        // Òì³££ºÈô´´½¨Ê§°Ü£¬Å×³ö Exception
+        // é™æ€åˆ›å»ºæ–¹æ³•ï¼šåˆ›å»ºæŒ‡å®šåè®®çš„å¥—æ¥å­—
+        // å‚æ•°ï¼šcreator - å¥—æ¥å­—åˆ›å»ºå‡½æ•°
+        // è¿”å›ï¼šåˆ›å»ºçš„ Socket å¯¹è±¡
+        // å¼‚å¸¸ï¼šè‹¥åˆ›å»ºå¤±è´¥ï¼ŒæŠ›å‡º Exception
         static Socket _Create(_Socket_creator_t creator) noexcept(false) {
             nng_socket s;
             auto rv = creator(&s);
