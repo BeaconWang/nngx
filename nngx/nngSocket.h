@@ -451,6 +451,76 @@ namespace nng
             return nng_sendmsg(_My_socket, msg, 0);
         }
 
+        // 带超时的消息发送（临时设置发送超时，发送完成后恢复原设置）
+        // 参数：msg - 原始消息指针，timeout_ms - 临时发送超时时间（毫秒）
+        // 返回：操作结果，0 表示成功
+        int send(nng_msg* msg, nng_duration timeout_ms) noexcept {
+            // 保存当前的发送超时设置
+            nng_duration original_timeout;
+            int rv = nng_socket_get_ms(_My_socket, NNG_OPT_SENDTIMEO, &original_timeout);
+            if (rv != NNG_OK) {
+                // 如果获取失败，使用默认值 0（无超时）
+                original_timeout = 0;
+            }
+
+            // 设置临时发送超时
+            nng_socket_set_ms(_My_socket, NNG_OPT_SENDTIMEO, timeout_ms);
+
+            // 执行发送
+            rv = nng_sendmsg(_My_socket, msg, 0);
+
+            // 恢复原来的发送超时设置
+            nng_socket_set_ms(_My_socket, NNG_OPT_SENDTIMEO, original_timeout);
+
+            return rv;
+        }
+
+        // 带超时的消息发送（临时设置发送超时，发送完成后恢复原设置）
+        // 参数：msg - 消息对象，timeout_ms - 临时发送超时时间（毫秒）
+        // 返回：操作结果，0 表示成功
+        // 注意：若发送成功，msg 的资源会被释放
+        int send(Msg&& msg, nng_duration timeout_ms) noexcept {
+            // 保存当前的发送超时设置
+            nng_duration original_timeout;
+            int rv = nng_socket_get_ms(_My_socket, NNG_OPT_SENDTIMEO, &original_timeout);
+            if (rv != NNG_OK) {
+                // 如果获取失败，使用默认值 0（无超时）
+                original_timeout = 0;
+            }
+
+            // 设置临时发送超时
+            nng_socket_set_ms(_My_socket, NNG_OPT_SENDTIMEO, timeout_ms);
+
+            // 执行发送
+            rv = nng_sendmsg(_My_socket, msg, 0);
+            if (rv == NNG_OK) {
+                msg.release();
+            }
+
+            // 恢复原来的发送超时设置
+            nng_socket_set_ms(_My_socket, NNG_OPT_SENDTIMEO, original_timeout);
+
+            return rv;
+        }
+
+        // 带超时的消息发送（临时设置发送超时，发送完成后恢复原设置）
+        // 参数：code - 消息代码，msg - 消息对象，timeout_ms - 临时发送超时时间（毫秒）
+        // 返回：操作结果，0 表示成功
+        // 注意：若发送成功，msg 的资源会被释放
+        int send(Msg::_Ty_msg_code code, Msg&& msg, nng_duration timeout_ms) noexcept {
+            int rv;
+            if (!msg) {
+                rv = msg.realloc(0);
+                if (rv != NNG_OK) {
+                    return rv;
+                }
+            }
+
+            Msg::_Append_msg_code(msg, code);
+
+            return send(std::move(msg), timeout_ms);
+        }
+
         // 同步接收数据
         // 参数：data - 数据缓冲区，size - 数据大小指针，flags - 接收标志
         // 返回：操作结果，0 表示成功
