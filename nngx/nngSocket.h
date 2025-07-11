@@ -102,6 +102,8 @@ namespace nng
             if (rv != NNG_OK) {
                 throw Exception(rv, "nng_sendmsg");
             }
+            msg.release();
+            // 接收返回消息
             msg = recv();
             return Msg::_Chop_msg_result(msg);
         }
