@@ -38,7 +38,7 @@ namespace nng
         int start(
             std::string_view addr,
             int flags = 0,
-            std::function<void(Peer& _Peer_ref)> cb = {}) noexcept(false) {
+            std::function<void(Peer&)> cb = {}) noexcept(false) {
             int rv = _Create();
             if (rv != NNG_OK) {
                 return rv;
