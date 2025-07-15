@@ -136,6 +136,11 @@ namespace nng {
             return nng_socket_raw(_My_socket, &raw);
         }
 
+        // 设置管道通知回调
+        int pipe_notify(nng_pipe_ev ev, nng_pipe_cb cb, void* arg) noexcept {
+            return nng_pipe_notify(_My_socket, ev, cb, arg);
+        }
+
     protected:
         nng_socket _My_socket = NNG_SOCKET_INITIALIZER; // 底层 nng_socket 句柄
     };

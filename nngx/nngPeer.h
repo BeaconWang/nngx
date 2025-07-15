@@ -2,6 +2,7 @@
 
 #include <memory>
 #include <string_view>
+#include <functional>
 
 #include "nngException.h"
 #include "nngSocket.h"
@@ -31,16 +32,24 @@ namespace nng
 
     public:
         // 启动连接
-        // 参数：addr - 连接地址，flags - 启动标志，默认为 0
+        // 参数：addr - 连接地址，flags - 启动标志，默认为 0，cb - 发起连接之前的回调（用于提前做一些设置）
         // 返回：操作结果，0 表示成功
         // 异常：若创建套接字或连接器失败，抛出 Exception
-        int start(std::string_view addr, int flags = 0) noexcept(false) {
+        int start(
+            std::string_view addr,
+            int flags = 0,
+            std::function<void(Peer& _Peer_ref)> cb = {}) noexcept(false) {
             int rv = _Create();
             if (rv != NNG_OK) {
                 return rv;
             }
 
             _My_connector = std::make_unique<_Connector_t>(*this, addr);
+
+            if (cb) {
+                cb(*this);
+            }
+
             return _My_connector->start(flags);
         }
 
