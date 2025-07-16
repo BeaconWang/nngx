@@ -22,10 +22,33 @@ namespace nng
 		}
 	public:
 		// 启动调度线程
-		// 参数：addr - 服务监听或连接的地址，flags - 启动标志，默认为 0
+		// 参数：addr - 服务监听或连接的地址，flags - 启动标志，默认为 0，cb - 发起连接之前的回调
 		// 返回：操作结果，0 表示成功，非 0 表示失败
 		// 异常：若基类启动失败，可能抛出 Exception
-		int start_dispatch(std::string_view addr, int flags = 0) noexcept(false)
+		template <typename _Peer_t>
+		int start_dispatch(
+			std::string_view addr,
+			int flags = 0,
+			std::function<void(_Peer_t&)> cb = {}) noexcept(false)
+		{
+			int rv = _TyBase::start(addr, flags, cb);
+			if (rv != NNG_OK) {
+				return rv;
+			}
+
+			_My_dispatch_thread = std::thread(
+				[=]
+				{
+					_TyBase::dispatch();
+				}
+			);
+
+			return NNG_OK;
+		}
+
+		int start_dispatch(
+			std::string_view addr,
+			int flags = 0) noexcept(false)
 		{
 			int rv = _TyBase::start(addr, flags);
 			if (rv != NNG_OK) {

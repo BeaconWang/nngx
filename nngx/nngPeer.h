@@ -29,7 +29,8 @@ namespace nng
         // 创建套接字的虚函数，由子类实现
         // 返回：操作结果，0 表示成功
         virtual int _Create() noexcept = 0;
-
+    public:
+        using Peer_t = Peer<_Connector_t>; // 定义 Peer 的别名，便于子类使用
     public:
         // 启动连接
         // 参数：addr - 连接地址，flags - 启动标志，默认为 0，cb - 发起连接之前的回调（用于提前做一些设置）

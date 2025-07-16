@@ -1013,6 +1013,39 @@ public:
         msg.insert_string(s);
         assert(msg.trim_string().compare(s) == 0);
     }
+    static void TestPreStart()
+    {
+        using namespace nng;
+
+        {
+            Service<Response> response;
+            response.start_dispatch<Service<Response>::Peer_t>(m_szAddr, 0,
+                [](Service<Response>::Peer_t& peer) {
+                    std::cout << "Pre response start." << std::endl;
+                });
+        }
+        {
+            Request request;
+            request.start(m_szAddr, 0, [](Request::Peer_t& peer) {
+                std::cout << "Pre request start." << std::endl;
+                });
+        }
+        {
+            Service<Pull<Dialer>> pull;
+            pull.start_dispatch<Service<Pull<Dialer>>::Peer_t>(
+                m_szAddr, 0,
+                [](Service<Pull<Dialer>>::Peer_t& peer) {
+                    std::cout << "Pre pull start." << std::endl;
+                });
+        }
+        {
+            Push<Listener> push;
+            push.start(m_szAddr, 0,
+                [](Push<Listener>::Peer_t& peer) {
+                std::cout << "Pre push start." << std::endl;
+                });
+        }
+    }
 private:
     inline static const char* m_szAddr = "ipc://test.addr";
 };
@@ -1021,6 +1054,7 @@ int main()
 {
     nng::util::initialize();
     NngTester::TestMsg();
+    NngTester::TestPreStart();
     NngTester::TestRawMessage_PushPull();
     NngTester::TestMessage_Pair();
     NngTester::TestMessage_RequestResponse();
