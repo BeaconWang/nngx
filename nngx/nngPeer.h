@@ -40,6 +40,9 @@ namespace nng
             std::string_view addr,
             int flags = 0,
             std::function<void(Peer&)> cb = {}) noexcept(false) {
+            // 关闭当前连接器（如果有）
+            close();
+
             int rv = _Create();
             if (rv != NNG_OK) {
                 return rv;
@@ -52,6 +55,12 @@ namespace nng
             }
 
             return _My_connector->start(flags);
+        }
+
+        // 关闭连接
+        virtual void close() noexcept override final {
+            _My_connector.reset();
+            Socket::close();
         }
 
         // 获取连接器指针

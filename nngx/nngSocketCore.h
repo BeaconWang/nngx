@@ -66,7 +66,7 @@ namespace nng {
         }
 
         // 关闭套接字
-        void close() noexcept {
+        virtual void close() noexcept {
             if (valid()) {
                 nng_socket_close(_My_socket);
                 _My_socket.id = 0;

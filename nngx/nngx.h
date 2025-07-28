@@ -33,6 +33,8 @@ __________
 			-> 1. Add SocketCore class to manage nng_socket
 			-> 2. Add SocketOpt class to manage nng_socket options
 			-> 3. Add Socket class to manage nng_socket and SocketOpt
+		-- Modify.Beacon.20250728
+            -> 1. Close socket&connector before start
 */
 
 /*
