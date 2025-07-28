@@ -57,8 +57,8 @@ namespace nng
             return _My_connector->start(flags);
         }
 
-        // 关闭连接
-        virtual void close() noexcept override final {
+        // 关闭连接(非多态)
+        void close() noexcept {
             _My_connector.reset();
             Socket::close();
         }
