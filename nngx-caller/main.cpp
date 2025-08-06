@@ -1046,6 +1046,130 @@ public:
                 });
         }
     }
+    static void TestMessage_RequestResponse_ServiceAio()
+    {
+        using namespace nng;
+        enum {
+            MSG_CODE0 = 0x345,
+        };
+        class ListenerRespnose : public ServiceAio<Response>
+        {
+        private:
+            virtual Msg::_Ty_msg_result _On_message(Msg::_Ty_msg_code code, Msg& msg) override {
+                if (code == MSG_CODE0) {
+                    assert(msg.chop_u32() == 0x12345678);
+                    assert(msg.len() == 0);
+
+                    msg.realloc(0);
+                    msg.insert_string("ReplyString");
+
+                    m_nCount++;
+                    return 0x87654321;
+                }
+                else {
+                    return 0;
+                }
+            }
+        public:
+            size_t m_nCount = 0;
+        };
+
+        ListenerRespnose response;
+        assert(response.start_dispatch(m_szAddr) == NNG_OK);
+
+        Request request;
+        assert(request.start(m_szAddr) == NNG_OK);
+
+        // 同步发送请求
+        for (size_t i(0); i < 3; ++i) {
+            Msg m(0);
+            m.append_u32(0x12345678);
+            auto result = request.send(MSG_CODE0, m);
+            assert(m.trim_string().compare("ReplyString") == 0);
+            assert(result == 0x87654321);
+        }
+
+        for (size_t i(0); i < 3; ++i) {
+            Msg m(0);
+            m.append_u32(0x12345678);
+            auto future = request.async_send(MSG_CODE0, std::move(m));
+            m = future.get();
+
+            auto result = Msg::_Chop_msg_result(m);
+            assert(m.trim_string().compare("ReplyString") == 0);
+            assert(result == 0x87654321);
+        }
+
+        response.stop_dispatch();
+        assert(response.m_nCount == 6);
+        printf("%s -> Passed\r\n", __FUNCTION__);
+    }
+
+
+
+    static void TestRawMessage_PushPull_HugeMessage_ServiceAio() {
+        using namespace nng;
+        enum {
+            MSG_CODE_SYNC = 0x1,
+            MSG_CODE_ASYNC
+        };
+        class MyPull : public ServiceAio<Pull<Dialer>>
+        {
+        private:
+            virtual Msg::_Ty_msg_result _On_message(Msg::_Ty_msg_code code, Msg& msg) override final {
+                switch (code) {
+                case MSG_CODE_SYNC: {
+                    std::string sRecv = msg.trim_string();
+                    assert(sRecv == "Hello World! Sync!");
+                    m_nCountSync++;
+                    std::cout << m_nCountSync << " : " << sRecv << std::endl;
+                    break;
+                }
+                case MSG_CODE_ASYNC: {
+                    std::string sRecv = msg.trim_string();
+                    assert(sRecv == "Hello World! Async!");
+                    m_nCountAsync++;
+                    std::cout << m_nCountAsync << " : " << sRecv << std::endl;
+                    break;
+                }
+                }
+                return {};
+            }
+
+        public:
+            size_t m_nCountSync = 0;
+            size_t m_nCountAsync = 0;
+        };
+
+        Push<Listener> pusher;
+        assert(pusher.start(m_szAddr) == NNG_OK);
+
+        MyPull puller;
+        assert(puller.start_dispatch(m_szAddr) == NNG_OK);
+
+        enum { DATA_COUNT = 10000 };
+        for (size_t i(0); i < DATA_COUNT; ++i) {
+            nng::Msg m(0);
+            m.insert_string("Hello World! Sync!");
+            pusher.send(MSG_CODE_SYNC, std::move(m));
+        }
+
+        for (size_t i(0); i < DATA_COUNT; ++i) {
+            nng::Msg m(0);
+            m.insert_string("Hello World! Async!");
+            pusher.async_send(MSG_CODE_ASYNC, std::move(m));
+        }
+
+        pusher.wait();
+        // 等待异步数据发送完成。
+        std::this_thread::sleep_for(std::chrono::seconds(1));
+        pusher.close();
+        puller.stop_dispatch();
+
+        assert(puller.m_nCountSync == DATA_COUNT);
+        assert(puller.m_nCountAsync == DATA_COUNT);
+        printf("%s -> Passed\r\n", __FUNCTION__);
+    }
 private:
     inline static const char* m_szAddr = "ipc://test.addr";
 };
@@ -1053,6 +1177,9 @@ private:
 int main()
 {
     nng::util::initialize();
+    NngTester::TestRawMessage_PushPull_HugeMessage_ServiceAio();
+    NngTester::TestMessage_RequestResponse_ServiceAio();
+    return 0;
     NngTester::TestMsg();
     NngTester::TestPreStart();
     NngTester::TestRawMessage_PushPull();

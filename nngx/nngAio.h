@@ -29,6 +29,7 @@ namespace nng
         // 析构函数：释放异步 I/O 资源
         virtual ~Aio() noexcept {
             if (_My_aio) {
+                nng_aio_stop(_My_aio);
                 nng_aio_free(_My_aio);
             }
         }

@@ -5,6 +5,8 @@
 
 #include <functional>
 #include <mutex>
+#include <memory>
+#include <atomic>
 
 #define NNG_STATIC_LIB
 
