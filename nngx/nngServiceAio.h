@@ -115,12 +115,6 @@ namespace nng
 				_My_aio->wait();
 			}
 		}
-
-        // 获取当前的 aio 对象
-		const std::unique_ptr<Aio>& service_aio() const noexcept
-		{
-			return _My_aio;
-        }
 	protected:
 		// 开始异步调度
 		// 说明：启动异步消息接收循环
@@ -187,7 +181,11 @@ namespace nng
 					if (!this->_On_raw_message(m)) {
 						auto code = Msg::_Chop_msg_code(m);
 						auto result = this->_On_message(code, m);
-						Msg::_Append_msg_result(m, result);
+
+                        // 如果基类是 DispatcherWithReturn，则附加处理结果
+						if constexpr (std::is_base_of_v<DispatcherWithReturn, _TyBase>) {
+							Msg::_Append_msg_result(m, result);
+						}
 					}
 
 					if (_My_running.load()) {

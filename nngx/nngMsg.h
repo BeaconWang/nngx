@@ -154,6 +154,7 @@ namespace nng
         // 向消息正文追加数据
         // 参数：data - 数据指针，data_size - 数据大小
         // 返回：操作结果，0 表示成功
+        inline int push(const void* data, size_t data_size) noexcept { return append(data, data_size); }
         int append(const void* data, size_t data_size) noexcept {
             return nng_msg_append(_My_msg, data, data_size);
         }
@@ -175,6 +176,7 @@ namespace nng
         // 从消息正文末尾裁剪指定大小的数据
         // 参数：size - 要裁剪的数据大小
         // 返回：操作结果，0 表示成功
+        inline int pop(size_t size) noexcept { return chop(size); }
         int chop(size_t size) noexcept {
             return nng_msg_chop(_My_msg, size);
         }
@@ -366,6 +368,7 @@ namespace nng
         // 向消息正文追加 16 位无符号整数
         // 参数：val - 要追加的 16 位无符号整数
         // 返回：操作结果，0 表示成功
+        inline int push_u16(uint16_t val) noexcept { return append_u16(val); }
         int append_u16(uint16_t val) noexcept {
             return nng_msg_append_u16(_My_msg, val);
         }
@@ -373,6 +376,7 @@ namespace nng
         // 向消息正文追加 32 位无符号整数
         // 参数：val - 要追加的 32 位无符号整数
         // 返回：操作结果，0 表示成功
+        inline int push_u32(uint32_t val) noexcept { return append_u32(val); }
         int append_u32(uint32_t val) noexcept {
             return nng_msg_append_u32(_My_msg, val);
         }
@@ -380,6 +384,7 @@ namespace nng
         // 向消息正文追加 64 位无符号整数
         // 参数：val - 要追加的 64 位无符号整数
         // 返回：操作结果，0 表示成功
+        inline int push_u64(uint64_t val) noexcept { return append_u64(val); }
         int append_u64(uint64_t val) noexcept {
             return nng_msg_append_u64(_My_msg, val);
         }
@@ -387,6 +392,7 @@ namespace nng
         // 向消息正文追加字符串
         // 参数：sv - 要追加的字符串视图
         // 返回：操作结果，0 表示成功
+        inline int push_string(std::string_view sv) noexcept { return append_string(sv); }
         int append_string(std::string_view sv) noexcept {
             int rv = nng_msg_append(_My_msg, sv.data(), sv.size());
             if (rv != NNG_OK) {
@@ -430,6 +436,7 @@ namespace nng
         // 从消息正文末尾裁剪 16 位无符号整数
         // 参数：val - 存储裁剪出的 16 位无符号整数的指针
         // 返回：操作结果，0 表示成功
+        inline int pop_u16(uint16_t* val) noexcept { return chop_u16(val); }
         int chop_u16(uint16_t* val) noexcept {
             return nng_msg_chop_u16(_My_msg, val);
         }
@@ -445,10 +452,19 @@ namespace nng
             }
             return v;
         }
+        inline std::optional<uint16_t> pop_u16() noexcept {
+            try {
+                return chop_u16();
+            }
+            catch (...) {
+                return std::nullopt;
+            }
+        }
 
         // 从消息正文末尾裁剪 32 位无符号整数
         // 参数：val - 存储裁剪出的 32 位无符号整数的指针
         // 返回：操作结果，0 表示成功
+        inline int pop_u32(uint32_t* val) noexcept { return chop_u32(val); }
         int chop_u32(uint32_t* val) noexcept {
             return nng_msg_chop_u32(_My_msg, val);
         }
@@ -464,10 +480,19 @@ namespace nng
             }
             return v;
         }
+        inline std::optional<uint32_t> pop_u32() noexcept {
+            try {
+                return chop_u32();
+            }
+            catch (...) {
+                return std::nullopt;
+            }
+        }
 
         // 从消息正文末尾裁剪 64 位无符号整数
         // 参数：val - 存储裁剪出的 64 位无符号整数的指针
         // 返回：操作结果，0 表示成功
+        inline int pop_u64(uint64_t* val) noexcept { return chop_u64(val); }
         int chop_u64(uint64_t* val) noexcept {
             return nng_msg_chop_u64(_My_msg, val);
         }
@@ -483,10 +508,19 @@ namespace nng
             }
             return v;
         }
+        inline std::optional<uint64_t> pop_u64() noexcept {
+            try {
+                return chop_u64();
+            }
+            catch (...) {
+                return std::nullopt;
+            }
+        }
 
         // 从消息正文末尾裁剪字符串
         // 参数：s - 存储裁剪出的字符串
         // 返回：操作结果，0 表示成功
+        inline int pop_string(std::string& s) noexcept { return chop_string(s); }
         int chop_string(std::string& s) noexcept {
             uint32_t string_len;
             int rv = nng_msg_chop_u32(_My_msg, &string_len);
@@ -508,6 +542,14 @@ namespace nng
                 throw Exception(rv, "chop_string");
             }
             return s;
+        }
+        inline std::optional<std::string> pop_string() noexcept {
+            try {
+                return chop_string();
+            }
+            catch (...) {
+                return std::nullopt;
+            }
         }
 
         // 从消息正文开头裁剪 16 位无符号整数

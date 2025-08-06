@@ -666,7 +666,6 @@ public:
         printf("%s -> Passed\r\n", __FUNCTION__);
     }
 
-
     static void TestMessage_Bus_Service()
     {
         using namespace nng;
@@ -1170,6 +1169,210 @@ public:
         assert(puller.m_nCountAsync == DATA_COUNT);
         printf("%s -> Passed\r\n", __FUNCTION__);
     }
+
+    static void TestMessage_Pair_ServiceAio() {
+        using namespace nng;
+        enum {
+            MSG_0 = 0,
+            MSG_1 = 1000,
+            MSG_OTHER = 23400,
+            MSG_REPLY = 5500,
+            MSG_QUIT = 56700,
+        };
+        class ListenerPair : public ServiceAio<Pair<Listener>>
+        {
+        private:
+            virtual Msg::_Ty_msg_result _On_message(Msg::_Ty_msg_code code, Msg& msg) override {
+                if (code == MSG_QUIT) {
+                    this->close();
+                    return {};
+                }
+
+                auto sArg = msg.chop_string();
+                printf("Listener[%zu] -> Code:%I64u, Argument:%s\n", ++m_nCount, code, sArg.c_str());
+                return {};
+            }
+        public:
+            size_t m_nCount = 0;
+        };
+        class DialerPair : public ServiceAio<Pair<Dialer>>
+        {
+        private:
+            virtual Msg::_Ty_msg_result _On_message(Msg::_Ty_msg_code code, Msg& msg) override {
+                if (code == MSG_QUIT) {
+                    this->send(MSG_QUIT);
+                    // 同步，上面发送完了再退出
+                    this->close();
+                    return {};
+                }
+                auto sArg = msg.chop_string();
+                printf("Dialer[%zu] -> Code:%I64u, Argument:%s\n", ++m_nCount, code, sArg.c_str());
+
+                msg.realloc(0);
+                msg.append_string("DialerReply");
+                this->async_send(MSG_REPLY, std::move(msg));
+                return {};
+            }
+        public:
+            size_t m_nCount = 0;
+        };
+
+        ListenerPair listenerPair;
+        assert(listenerPair.start_dispatch(m_szAddr) == NNG_OK);
+        DialerPair dialerPair;
+        assert(dialerPair.start_dispatch(m_szAddr) == NNG_OK);
+
+        for (size_t i(0); i < 10; ++i) {
+            Msg m(0);
+            m.append_string("Arg0");
+            listenerPair.async_send(MSG_0, std::move(m));
+
+            m.realloc(0);
+            m.append_string("Arg1");
+            listenerPair.async_send(MSG_1, std::move(m));
+
+            m.realloc(0);
+            m.append_string("ArgOther");
+            dialerPair.async_send(MSG_OTHER, std::move(m));
+        }
+
+        listenerPair.async_send(MSG_QUIT, {});
+
+        dialerPair.service_wait();
+        listenerPair.service_wait();
+
+        assert(listenerPair.m_nCount == 30);
+        printf("%s -> Passed\r\n", __FUNCTION__);
+    }
+    static void TestMessage_Bus_ServiceAio()
+    {
+        using namespace nng;
+        enum {
+            MSG_CODE0 = 0x345,
+        };
+        class MyBus : public ServiceAio<Bus>
+        {
+        private:
+            virtual Msg::_Ty_msg_result _On_message(Msg::_Ty_msg_code code, Msg& msg) override {
+                if (code == MSG_CODE0) {
+                    std::string s = msg.chop_string();
+                    printf("BusReceive[%zu]:%s\n", m_nIdx, s.c_str());
+                    assert(s.compare("BusString") == 0);
+                    assert(msg.len() == 0);
+                    m_fReceived = true;
+                    std::this_thread::sleep_for(std::chrono::milliseconds(500));
+                    return {};
+                }
+
+                return {};
+            }
+        public:
+            bool m_fReceived = false;
+            size_t m_nIdx = SIZE_MAX;
+        };
+
+        enum { BUS_COUNT = 3 };
+        std::array<MyBus, BUS_COUNT> buses;
+        for (size_t i(0); i < BUS_COUNT; ++i) {
+            std::string sAddr = m_szAddr + std::to_string(i);
+            buses[i].m_nIdx = i;
+            assert(buses[i].start_dispatch(sAddr) == NNG_OK);
+        }
+
+        for (size_t i(0); i < BUS_COUNT; ++i) {
+            for (size_t j(i + 1); j < BUS_COUNT; ++j) {
+                if (i != j) {
+                    std::string sAddr = m_szAddr + std::to_string(j);
+                    assert(buses[i].dial(sAddr) == NNG_OK);
+                }
+            }
+        }
+
+        auto randomInt = [](int min, int max)
+            {
+                static std::random_device rd;
+                static std::mt19937 gen(rd());
+                std::uniform_int_distribution<> dis(min, max);
+                return dis(gen);
+            };
+
+        int idx = randomInt(0, BUS_COUNT - 1);
+        Msg m(0);
+        m.append_string("BusString");
+        buses[idx].async_send(MSG_CODE0, std::move(m));
+        buses[idx].wait();
+
+        for (size_t i(0); i < BUS_COUNT; ++i) {
+            buses[i].close();
+            buses[i].service_wait();
+        }
+
+        for (size_t i(0); i < BUS_COUNT; ++i) {
+            if (i != idx) {
+                assert(buses[i].m_fReceived);
+            }
+        }
+
+        printf("%s -> Passed\r\n", __FUNCTION__);
+    }
+
+    static void TestMessage_PublisherSubscriber_RawAio() {
+        using namespace nng;
+        enum {
+            MSG_CODE0 = 0x345,
+            MSG_QUIT,
+        };
+        class ListenerSubscriber : public ServiceAio<Subscriber<>>
+        {
+        private:
+            virtual bool _On_raw_message(Msg& msg) override final {
+                auto code = msg.pop_u32();
+                if (code && code == MSG_CODE0) {
+                    std::string s = msg.pop_string().value_or("");
+                    assert(s.compare("PublishString") == 0);
+                    assert(msg.len() == 0);
+                    printf("%s\n", s.c_str());
+                    m_nCount++;
+                }
+
+                return true;
+            }
+        public:
+            size_t m_nCount = 0;
+        };
+
+        Publisher publisher;
+        publisher.start(m_szAddr);
+
+        enum { MESSAGE_COUNT = 1 };
+        enum { SUBCRIBER_COUNT = 1 };
+        ListenerSubscriber subscribers[SUBCRIBER_COUNT];
+        for (auto& subscriber : subscribers) {
+            assert(subscriber.start_dispatch(m_szAddr) == NNG_OK);
+            subscriber.socket_subscribe();
+        }
+
+        std::this_thread::sleep_for(std::chrono::milliseconds(500));
+
+        for (size_t i(0); i < MESSAGE_COUNT; ++i) {
+            // Sync
+            Msg m(0);
+            m.push_string("PublishString");
+            m.push_u32(MSG_CODE0);
+            assert(publisher.send(std::move(m)) == NNG_OK);
+        }
+
+        std::this_thread::sleep_for(std::chrono::milliseconds(500));
+
+        for (auto& subscriber : subscribers) {
+            subscriber.close();
+            subscriber.service_wait();
+            assert(subscriber.m_nCount == MESSAGE_COUNT);
+        }
+        publisher.close();
+
+        printf("%s -> Passed\r\n", __FUNCTION__);
+    }
 private:
     inline static const char* m_szAddr = "ipc://test.addr";
 };
@@ -1177,9 +1380,6 @@ private:
 int main()
 {
     nng::util::initialize();
-    NngTester::TestRawMessage_PushPull_HugeMessage_ServiceAio();
-    NngTester::TestMessage_RequestResponse_ServiceAio();
-    return 0;
     NngTester::TestMsg();
     NngTester::TestPreStart();
     NngTester::TestRawMessage_PushPull();
@@ -1196,6 +1396,13 @@ int main()
     NngTester::TestMessage_Pair_Service();
     NngTester::TestMessage_PublisherSubscriber_Raw();
     NngTester::TestRawMessage_PushPull_HugeMessage();
+
+    NngTester::TestMessage_PublisherSubscriber_RawAio();
+    NngTester::TestMessage_SurveyRespond_Service();
+    NngTester::TestMessage_Bus_ServiceAio();
+    NngTester::TestMessage_Pair_ServiceAio();
+    NngTester::TestRawMessage_PushPull_HugeMessage_ServiceAio();
+    NngTester::TestMessage_RequestResponse_ServiceAio();
     nng::util::uninitialize();
     return EXIT_SUCCESS;
 }
