@@ -38,6 +38,10 @@ __________
 			-> 3. Add Socket class to manage nng_socket and SocketOpt
 		-- Modify.Beacon.20250728
             -> 1. Close socket&connector before start
+		-- Modify.Beacon.20250811
+            -> 1. Add the ServiceAio class to use nng_aio instead of thread to implement async dispatch
+            -> 2. Adjust the file directory structure
+            -> 3. Optimise the code structure of Dispatcher...
 */
 
 /*
