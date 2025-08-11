@@ -40,8 +40,6 @@ namespace nng
             std::string_view addr,
             int flags = 0,
             std::function<void(Peer&)> cb = {}) noexcept(false) {
-            // 关闭当前连接器（如果有）
-            close();
 
             int rv = _Create();
             if (rv != NNG_OK) {
@@ -54,7 +52,11 @@ namespace nng
                 cb(*this);
             }
 
-            return _My_connector->start(flags);
+            rv = _My_connector->start(flags);
+            if (rv != NNG_OK) {
+                // 关闭当前连接和连接器
+                close();
+            }
         }
 
         // 关闭连接(非多态)
