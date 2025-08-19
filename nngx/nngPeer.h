@@ -29,8 +29,13 @@ namespace nng
         // 创建套接字的虚函数，由子类实现
         // 返回：操作结果，0 表示成功
         virtual int _Create() noexcept = 0;
+
     public:
         using Peer_t = Peer<_Connector_t>; // 定义 Peer 的别名，便于子类使用
+        virtual ~Peer() noexcept {
+            // 确保在析构时关闭连接和连接器
+            close();
+        }
     public:
         // 启动连接
         // 参数：addr - 连接地址，flags - 启动标志，默认为 0，cb - 发起连接之前的回调（用于提前做一些设置）
@@ -40,23 +45,26 @@ namespace nng
             std::string_view addr,
             int flags = 0,
             std::function<void(Peer&)> cb = {}) noexcept(false) {
-
+            // 创建套接字
             int rv = _Create();
             if (rv != NNG_OK) {
                 return rv;
             }
 
+            // 创建连接器
             _My_connector = std::make_unique<_Connector_t>(*this, addr);
 
             if (cb) {
                 cb(*this);
             }
-
+            // 启动连接器
             rv = _My_connector->start(flags);
             if (rv != NNG_OK) {
                 // 关闭当前连接和连接器
                 close();
             }
+
+            return rv;
         }
 
         // 关闭连接(非多态)
