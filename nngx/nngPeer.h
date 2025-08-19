@@ -32,11 +32,11 @@ namespace nng
 
     public:
         using Peer_t = Peer<_Connector_t>; // 定义 Peer 的别名，便于子类使用
+    public:
         virtual ~Peer() noexcept {
             // 确保在析构时关闭连接和连接器
             close();
         }
-    public:
         // 启动连接
         // 参数：addr - 连接地址，flags - 启动标志，默认为 0，cb - 发起连接之前的回调（用于提前做一些设置）
         // 返回：操作结果，0 表示成功
